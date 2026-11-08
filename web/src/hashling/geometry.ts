@@ -94,10 +94,12 @@ export interface Wearable {
   fur?: Region[]
   /** contact shadow generated from the item's own alpha, confined to the clip */
   shadow?: { dy: number; blur: number; opacity: number }
-  /** code-native fitted band drawn instead of the PNG body (the PNG then only supplies `detail`) */
-  band?: { anchor: AnchorName; markup: string }
-  /** part of the PNG (path in fractions of alphaBounds) redrawn above the fur patches with a narrow feather: pendants, central ornament */
-  detail?: { d: string; feather: number }
+  /**
+   * Pendant drawn at its own scale: the art is split at `cut` (fraction of the alpha height). Above it = the band (mount scale),
+   * below it, within `xr` (fractions of the alpha width) = the pendant, scaled to `w` units for the full art width and hung from
+   * the band's cut line (`dy` nudges it). The pendant is drawn above the foreground fur.
+   */
+  pendant?: { cut: number; xr: [number, number]; w: number; dy?: number }
 }
 export const WEARABLES = ITEMS.wearables as unknown as Record<string, Wearable>
 export const STRAP_SVG = ITEMS.svg as unknown as Record<string, { layer: Layer; anchor: AnchorName; markup: string }>
@@ -130,5 +132,23 @@ export function wearableTransform(w: Wearable, stage: Stage, anchors: Frames, ex
   const k = m.w / aw
   const px = x0 + m.at[0] * aw, py = y0 + m.at[1] * ah
   return `translate(${o.x.toFixed(2)} ${o.y.toFixed(2)}) rotate(${(o.rot + (m.rot ?? 0)).toFixed(2)}) scale(${o.unit.toFixed(4)}) translate(${m.dx} ${m.dy + extraDy}) scale(${k.toFixed(5)}) translate(${-px.toFixed(1)} ${-py.toFixed(1)})`
+}
+/** Numbers behind wearableTransform (for items that need a second, related transform such as a pendant). */
+export function mountParts(w: Wearable, stage: Stage, anchors: Frames) {
+  const m: Mount = { ...w.mount, ...(w.mount.byStage?.[stage] ?? {}) }
+  const o = mountOrigin(m, anchors)
+  if (!o) return null
+  const [x0, y0, x1, y1] = w.alphaBounds
+  const aw = x1 - x0, ah = y1 - y0
+  return { o, m, k: m.w / aw, px: x0 + m.at[0] * aw, py: y0 + m.at[1] * ah, x0, y0, aw, ah }
+}
+/** Transform for the pendant portion of the art (see Wearable.pendant). */
+export function pendantTransform(w: Wearable, stage: Stage, anchors: Frames): string | null {
+  const P = w.pendant, mp = mountParts(w, stage, anchors)
+  if (!P || !mp) return null
+  const cx = mp.x0 + 0.5 * mp.aw, cy = mp.y0 + P.cut * mp.ah // joint: centre of the cut line, in source px
+  const px = mp.m.dx + mp.k * (cx - mp.px), py = mp.m.dy + mp.k * (cy - mp.py) + (P.dy ?? 0) // where the band puts it (neck units)
+  const kp = P.w / mp.aw
+  return `translate(${mp.o.x.toFixed(2)} ${mp.o.y.toFixed(2)}) rotate(${(mp.o.rot + (mp.m.rot ?? 0)).toFixed(2)}) scale(${mp.o.unit.toFixed(4)}) translate(${px.toFixed(2)} ${py.toFixed(2)}) scale(${kp.toFixed(5)}) translate(${-cx.toFixed(1)} ${-cy.toFixed(1)})`
 }
 export const mountFor = (w: Wearable, stage: Stage): Mount => ({ ...w.mount, ...(w.mount.byStage?.[stage] ?? {}) })

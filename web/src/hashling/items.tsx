@@ -1,7 +1,7 @@
 // Wearable layers, driven by the registry in items.json (v2): isolated PNG artwork + a mount per item.
 // Layer order, back to front: behindPet, [pet], frontStraps, frontAccessory, collar, hat (Hashling.tsx draws the pet).
 import type { Equipped, Stage } from '../api'
-import { anchorTransform, assetUrl, imageTransform, mountFor, STRAP_SVG, WEARABLES, wearableTransform, wearableUrl, type AnchorName, type Layer, type Placement, type Region, type WorldAnchor } from './geometry'
+import { anchorTransform, assetUrl, imageTransform, mountFor, pendantTransform, STRAP_SVG, WEARABLES, wearableTransform, wearableUrl, type AnchorName, type Layer, type Placement, type Region, type WorldAnchor } from './geometry'
 
 type Anchors = Record<AnchorName, WorldAnchor> | null
 
@@ -38,8 +38,10 @@ export function WearLayer({ layer, equipped, anchors, stage, uid, pet }: { layer
         const k = `${uid}-${id}`
         const art = (extra?: { clip?: string; mask?: string; filter?: string; opacity?: number }) => (
           <image href={wearableUrl(w.file)} x={0} y={0} width={w.width} height={w.height} aria-hidden
-            mask={extra?.mask} filter={extra?.filter} opacity={extra?.opacity} clipPath={extra?.clip} />
+            mask={extra?.mask} filter={extra?.filter} opacity={extra?.opacity}
+            clipPath={extra?.clip ?? (w.pendant ? `url(#${k}-band)` : undefined)} />
         )
+        const tPend = w.pendant ? pendantTransform(w, stage, anchors) : null
         const clipA = w.clip && anchors[w.clip.anchor as AnchorName]
         const tShadow = w.shadow ? wearableTransform(w, stage, anchors, w.shadow.dy) : null
         const mk = mountFor(w, stage)
@@ -72,34 +74,25 @@ export function WearLayer({ layer, equipped, anchors, stage, uid, pet }: { layer
                   <mask id={`${k}-m`} maskUnits="userSpaceOnUse" x="0" y="0" width={w.width} height={w.height}><rect width={w.width} height={w.height} fill={`url(#${k}-mg)`} /></mask>
                 </>
               ) : null}
-              {w.detail ? (
+              {w.pendant ? (
                 <>
-                  <filter id={`${k}-df`} x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation={w.detail.feather} /></filter>
-                  <mask id={`${k}-det`} maskUnits="userSpaceOnUse" x="0" y="0" width={w.width} height={w.height}>
-                    <g transform={`translate(${x0} ${w.alphaBounds[1]}) scale(${x1 - x0} ${w.alphaBounds[3] - w.alphaBounds[1]})`}>
-                      <path d={w.detail.d} fill="#fff" filter={`url(#${k}-df)`} />
-                    </g>
-                  </mask>
+                  <clipPath id={`${k}-band`}><rect x="0" y="0" width={w.width} height={w.alphaBounds[1] + w.pendant.cut * (w.alphaBounds[3] - w.alphaBounds[1])} /></clipPath>
+                  <clipPath id={`${k}-pend`}>
+                    <rect x={x0 + w.pendant.xr[0] * (x1 - x0)} y={w.alphaBounds[1] + w.pendant.cut * (w.alphaBounds[3] - w.alphaBounds[1])}
+                      width={(w.pendant.xr[1] - w.pendant.xr[0]) * (x1 - x0)} height={w.height} />
+                  </clipPath>
                 </>
               ) : null}
             </defs>
-            {/* 1+2. the wearable body, clipped to where it is actually visible. A code-native band carries its own contact shadow. */}
-            {w.band && anchors[w.band.anchor] ? (
+            {/* 1+2. contact shadow, then the wearable body, clipped to where it is actually visible */}
+            {tShadow ? (
               <g clipPath={w.clip && clipA ? `url(#${k}-clip)` : undefined}>
-                <g transform={anchorTransform(anchors[w.band.anchor])} dangerouslySetInnerHTML={{ __html: w.band.markup.split('{{uid}}').join(k) }} />
+                <g transform={tShadow}>{art({ filter: `url(#${k}-shf)`, opacity: w.shadow!.opacity })}</g>
               </g>
-            ) : (
-              <>
-                {tShadow ? (
-                  <g clipPath={w.clip && clipA ? `url(#${k}-clip)` : undefined}>
-                    <g transform={tShadow}>{art({ filter: `url(#${k}-shf)`, opacity: w.shadow!.opacity })}</g>
-                  </g>
-                ) : null}
-                <g clipPath={w.clip && clipA ? `url(#${k}-clip)` : undefined}>
-                  <g transform={t}>{art({ mask: fade ? `url(#${k}-m)` : undefined })}</g>
-                </g>
-              </>
-            )}
+            ) : null}
+            <g clipPath={w.clip && clipA ? `url(#${k}-clip)` : undefined}>
+              <g transform={t}>{art({ mask: fade ? `url(#${k}-m)` : undefined })}</g>
+            </g>
             {/* 3. local foreground fur: the selected pet image itself, clipped to small tuft-shaped regions */}
             {(w.fur ?? []).map((r, i) => anchors[r.anchor as AnchorName] ? (
               <g key={i} mask={`url(#${k}-fm${i})`}>
@@ -108,9 +101,9 @@ export function WearLayer({ layer, equipped, anchors, stage, uid, pet }: { layer
                 </g>
               </g>
             ) : null)}
-            {/* 4. exposed pendant / ornament drawn above the fur */}
-            {w.detail ? (
-              <g transform={t}><g mask={`url(#${k}-det)`}>{art()}</g></g>
+            {/* 4. exposed pendant / ornament, on its own scale, above the fur patches */}
+            {tPend ? (
+              <g transform={tPend}>{art({ clip: `url(#${k}-pend)` })}</g>
             ) : null}
           </g>
         )
