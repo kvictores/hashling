@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useState, type FocusEvent } from 'reac
 import { Link } from 'react-router-dom'
 import { api, type Equipped, type ShopItem, type Slot } from '../api'
 import { useUser } from '../UserContext'
-import { Hashling, type Focus } from '../hashling/Hashling'
+import { Hashling } from '../hashling/Hashling'
+import { wearableUrl, WEARABLES } from '../hashling/geometry'
 import { PetStand, Scene, SceneBackground } from '../hashling/Scene'
 import { FUR } from '../hashling/palettes'
 import { Card, Coin, ProgressBar } from '../components/ui'
@@ -15,10 +16,6 @@ const SLOTS: { slot: Slot; label: string }[] = [
   { slot: 'background', label: 'Backgrounds' },
 ]
 const DEFAULTS: Partial<Record<Slot, string>> = { fur: 'fur_classic', background: 'bg_greenhouse' }
-
-/** Which part of the pet an item thumbnail zooms onto (same renderer as the big preview, just a tighter viewBox). */
-const FOCUS: Record<string, Focus | undefined> = { hat: 'hat', collar: 'collar', acc_shield: 'chest', acc_glass: 'paw' }
-const focusFor = (it: ShopItem): Focus | undefined => FOCUS[it.id] ?? FOCUS[it.slot]
 
 // Keyed by user: switching Maya/Sam remounts the shop, so a half-tried item can never carry over to the other user.
 export default function Shop() {
@@ -166,7 +163,7 @@ function ItemCard({ it, stage, wallet, busy, isPinned, isDefault, onHover, onFoc
   )
 }
 
-/** Thumbnails use the very same Hashling renderer as the big preview (just cropped onto the item). */
+/** Thumbnails show the isolated wearable artwork from the same registry the live try-on uses (alpha kept: no backing rectangle). */
 function Thumb({ it, stage }: { it: ShopItem; stage: 'kitten' | 'cub' | 'adult' }) {
   if (it.slot === 'background') {
     return <div className="absolute inset-0"><SceneBackground id={it.id} /></div>
@@ -180,8 +177,15 @@ function Thumb({ it, stage }: { it: ShopItem; stage: 'kitten' | 'cub' | 'adult' 
       </div>
     )
   }
-  const focus = focusFor(it)
-  return <Hashling stage={stage} mood="happy" equipped={{ [it.slot]: it.id }} size={focus ? '100%' : '94%'} animated={false} focus={focus} />
+  const w = WEARABLES[it.id]
+  if (!w) return null
+  // crop the PNG to its physical-content box so every item fills its tile the same way
+  const [x0, y0, x1, y1] = w.alphaBounds
+  return (
+    <svg viewBox={`${x0} ${y0} ${x1 - x0} ${y1 - y0}`} className="h-[80%] w-[84%] self-center" role="img" aria-label={it.name} preserveAspectRatio="xMidYMid meet">
+      <image href={wearableUrl(w.file)} x={0} y={0} width={w.width} height={w.height} />
+    </svg>
+  )
 }
 
 function LockedOverlay() {

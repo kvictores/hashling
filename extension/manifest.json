@@ -23,10 +23,20 @@
       "assets/hashling/hashling-kitten.png",
       "assets/hashling/hashling-cub.png",
       "assets/hashling/hashling-cub-alert.png",
-      "assets/hashling/hashling-adult-classic-v3.png",
-      "assets/hashling/hashling-adult-moss-v3.png",
-      "assets/hashling/hashling-adult-amber-v3.png",
-      "assets/hashling/hashling-adult-cyan-v3.png"
+      "assets/hashling/hashling-adult-classic-v4.png",
+      "assets/hashling/hashling-adult-moss-v4.png",
+      "assets/hashling/hashling-adult-amber-v4.png",
+      "assets/hashling/hashling-adult-cyan-v4.png",
+      "assets/hashling/wearables/hat_sprout.png",
+      "assets/hashling/wearables/hat_visor.png",
+      "assets/hashling/wearables/hat_flower.png",
+      "assets/hashling/wearables/hat_antenna.png",
+      "assets/hashling/wearables/collar_bell.png",
+      "assets/hashling/wearables/collar_vine.png",
+      "assets/hashling/wearables/collar_led.png",
+      "assets/hashling/wearables/acc_solar.png",
+      "assets/hashling/wearables/acc_glass.png",
+      "assets/hashling/wearables/acc_shield.png"
     ],
     "matches": ["<all_urls>"]
   }]
