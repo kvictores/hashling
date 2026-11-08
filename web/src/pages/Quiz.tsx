@@ -138,13 +138,8 @@ function LeafNodes({ results, idx, done }: { results: (boolean | null)[]; idx: n
 }
 
 function Results({ quiz, earned, streak }: { quiz: QuizToday; earned: { label: string; points: number }[]; streak: number }) {
-  const [copied, setCopied] = useState(false)
   const results = quiz.questions.map(q => !!q.correct)
-  const share = quiz.share ?? `Hashling Daily #${quiz.day_number} ${results.map(c => (c ? '🟩' : '🟥')).join('')} 🔥${streak}`
   const total = earned.reduce((s, b) => s + b.points, 0)
-  const copy = async () => {
-    try { await navigator.clipboard.writeText(share); setCopied(true); setTimeout(() => setCopied(false), 1800) } catch { /* ignore */ }
-  }
   return (
     <Card className="fade-up text-center">
       {/* quiz completion (not "reached the top"): the shield is decorative, the text says how many were correct */}
@@ -161,10 +156,6 @@ function Results({ quiz, earned, streak }: { quiz: QuizToday; earned: { label: s
           <div className="flex justify-between pt-1 font-bold"><span>Total today</span><span className="data text-leaf">+{total}</span></div>
         </div>
       )}
-      <div className="mx-auto mt-6 flex max-w-lg items-center gap-2 rounded-2xl bg-white/80 p-2 pl-4 text-left">
-        <code className="flex-1 truncate font-mono text-sm">{share}</code>
-        <button className="btn btn-primary !py-2" onClick={copy}>{copied ? 'Copied!' : 'Copy'}</button>
-      </div>
       <p className="mt-6 text-lg font-semibold">Come back tomorrow for 3 new questions 🌱</p>
       <p className="mt-1 text-muted"><Countdown /></p>
       <Link to="/" className="btn btn-ghost mt-5">Back to the Den</Link>
