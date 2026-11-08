@@ -141,3 +141,9 @@ crown / ears / neck / chest / shoulders / paw anchors; `items.json` is the versi
 each with its alphaBounds, render layer and mount). After editing either, run `python scripts/sync_items.py` so the
 no-build-step extension (`extension/hashling.js`) stays identical. Layer order: shadow, behind-pet (backpack), pet, straps, front accessory, collar, hat.
 The art is static, so moods are pose motion plus a small cue badge (the cub uses the supplied alert pose).
+
+## Two looks, two branches
+- `feat/hashling-accessories` (baseline `caa49ec`): the smooth dimensional look (v4 adult, PNG wearables with fur-patch compositing).
+- `feat/hashling-pixel-overhaul`: the warm pixel-art look (hashling-pixel-overhaul-v3). Sprites per stage and mood in `web/public/assets/hashling/pixel`,
+  fur colours derived by `scripts/export_pixel_assets.py`, per-sprite anchors in `web/src/hashling/pets.json`, wearable registry v3 in `items.json`.
+Switch with `git switch feat/hashling-accessories` or `git switch feat/hashling-pixel-overhaul` (clean working tree first; `npm run dev` hot-reloads, reload the unpacked extension at chrome://extensions).
