@@ -14,7 +14,8 @@ hashling/
   backend/     FastAPI + SQLite: detection engine, quiz, points, shop, events, eval.py
   web/         React + Vite + TypeScript + Tailwind: Den, Quiz, Scam Check, Shop, File Check, Passwords, About, demo pages
   extension/   Chrome Manifest V3, plain JS (no build step)
-  scripts/     sync_items.py (copies pet item art from web → extension)
+  scripts/     sync_items.py (copies items.json + pets.json from web → extension/hashling.js)
+               export_hashling_assets.py (dev-only, needs Pillow: exports the visual-kit PNGs + icons)
 ```
 
 ## Quick start
@@ -132,3 +133,10 @@ The main set was written while building the rules, so its score is optimistic. T
 - Item artwork lives in `web/src/hashling/items.json`. After editing it, run `python scripts/sync_items.py` to update the extension.
 - Uvicorn's `--reload` was unreliable on Windows during development; restart the server after backend changes.
 - All brands (SwiftShip Parcel, MegaMart, Northbridge Bank, MetroToll, CloudNest, …) and all data are fictional. No third-party logos are used.
+
+## Visual refresh: how the mascot is built
+Hashling is the supplied PNG art (`web/public/assets/hashling`, `extension/assets/hashling`) with wearables drawn as SVG layers on
+the art's anatomy anchors. `web/src/hashling/pets.json` holds each stage/fur's art file, normalisation and the crown / neck / chest /
+shoulders / paw anchors; `items.json` holds the wearable SVG fragments. After editing either, run `python scripts/sync_items.py` so the
+no-build-step extension (`extension/hashling.js`) stays identical. Layer order: shadow, behind-accessory, pet, front accessory, collar, hat.
+The art is static, so moods are pose motion plus a small cue badge (the cub uses the supplied alert pose).
