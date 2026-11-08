@@ -6,7 +6,7 @@
 - **Preventive:** a website with 3 daily security questions. Points grow your pet (egg → kitten → cub → adult) and buy customizations.
 - **The link (the pitch):** warnings are delivered *by Hashling* (puffed-up alert pose, not a generic red box) to fight alert fatigue. Heeding a warning earns points; ignoring one makes Hashling sad; every blocked threat unlocks a bonus question about that scam type.
 
-Everything works with **no API keys** (local heuristics + local hash list). Keys only add extra checks.
+Everything works with **no API keys** (local heuristics + local hash list).
 
 ```
 hashling/
