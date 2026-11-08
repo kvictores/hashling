@@ -1,6 +1,6 @@
 import { useId } from 'react'
 import type { Equipped, Mood, Stage } from '../api'
-import { AccessoryBehind, AccessoryFront, CollarLayer, HatLayer } from './items'
+import { WearLayer } from './items'
 import { assetUrl, GROUND_Y, imageTransform, placement, type WorldAnchor } from './geometry'
 
 /** Crop the canvas to the part of the pet an item sits on (shop thumbnails use the same renderer, just zoomed in). */
@@ -73,13 +73,14 @@ export function Hashling({ stage, mood = 'happy', equipped = {}, size = 200, cla
       <g className={bodyClass}>
         <g transform={pose || undefined}>
           <g style={tone ? { filter: tone } : undefined}>
-            {a && <AccessoryBehind item={equipped.accessory} anchors={a} uid={uid} />}
+            <WearLayer layer="behindPet" equipped={equipped} anchors={a} stage={stage} uid={uid} />
             <g transform={imageTransform(pl)}>
               <image href={assetUrl(pl.file)} x={pl.x} y={pl.y} width={pl.size} height={pl.size} preserveAspectRatio="xMidYMid meet" aria-hidden />
             </g>
-            {a && <AccessoryFront item={equipped.accessory} anchors={a} uid={uid} />}
-            {a && <CollarLayer item={equipped.collar} anchors={a} uid={uid} />}
-            {a && <HatLayer item={equipped.hat} anchors={a} uid={uid} />}
+            <WearLayer layer="frontStraps" equipped={equipped} anchors={a} stage={stage} uid={uid} />
+            <WearLayer layer="frontAccessory" equipped={equipped} anchors={a} stage={stage} uid={uid} />
+            <WearLayer layer="collar" equipped={equipped} anchors={a} stage={stage} uid={uid} />
+            <WearLayer layer="hat" equipped={equipped} anchors={a} stage={stage} uid={uid} />
           </g>
         </g>
       </g>

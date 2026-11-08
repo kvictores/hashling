@@ -72,3 +72,51 @@ export const imageTransform = (p: Placement) => {
 
 export const CANVAS_SIZE = CANVAS
 export const GROUND_Y = GROUND
+
+// ---------------------------------------------------------------- wearables (registry v2, see items.json)
+import ITEMS from './items.json'
+
+export type Layer = 'behindPet' | 'frontStraps' | 'frontAccessory' | 'collar' | 'hat'
+export interface Mount {
+  anchor?: AnchorName | 'earL' | 'earR'
+  span?: [string, string]
+  at: [number, number]; w: number; dx: number; dy: number; rot?: number; mask?: number
+  byStage?: Partial<Record<Stage, Partial<Mount>>>
+}
+export interface Wearable {
+  slot: string; layer: Layer; file: string; width: number; height: number
+  alphaBounds: [number, number, number, number]; mount: Mount; straps?: string
+}
+export const WEARABLES = ITEMS.wearables as unknown as Record<string, Wearable>
+export const STRAP_SVG = ITEMS.svg as unknown as Record<string, { layer: Layer; anchor: AnchorName; markup: string }>
+
+export const wearableUrl = (file: string) => `${import.meta.env.BASE_URL}assets/hashling/wearables/${file}.png`
+
+type Frames = Record<string, WorldAnchor>
+
+/** Resolve a mount's origin frame in SVG space (a single anchor, or the midpoint of two for items that span the head). */
+export function mountOrigin(m: Mount, anchors: Frames): WorldAnchor | null {
+  if (m.span) {
+    const a = anchors[m.span[0]], b = anchors[m.span[1]]
+    if (!a || !b) return null
+    const dx = b.x - a.x, dy = b.y - a.y
+    return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, unit: Math.hypot(dx, dy) / 100, rot: (Math.atan2(dy, dx) * 180) / Math.PI }
+  }
+  return (m.anchor && anchors[m.anchor]) || null
+}
+
+/**
+ * SVG transform that places a wearable's source-pixel image (drawn at 0,0,width,height) on the pet:
+ * the `at` fraction of its physical-content (alpha) box lands on the anchor, scaled so that box spans `w` canonical units.
+ */
+export function wearableTransform(w: Wearable, stage: Stage, anchors: Frames): string | null {
+  const m: Mount = { ...w.mount, ...(w.mount.byStage?.[stage] ?? {}) }
+  const o = mountOrigin(m, anchors)
+  if (!o) return null
+  const [x0, y0, x1, y1] = w.alphaBounds
+  const aw = x1 - x0, ah = y1 - y0
+  const k = m.w / aw
+  const px = x0 + m.at[0] * aw, py = y0 + m.at[1] * ah
+  return `translate(${o.x.toFixed(2)} ${o.y.toFixed(2)}) rotate(${(o.rot + (m.rot ?? 0)).toFixed(2)}) scale(${o.unit.toFixed(4)}) translate(${m.dx} ${m.dy}) scale(${k.toFixed(5)}) translate(${-px.toFixed(1)} ${-py.toFixed(1)})`
+}
+export const mountFor = (w: Wearable, stage: Stage): Mount => ({ ...w.mount, ...(w.mount.byStage?.[stage] ?? {}) })

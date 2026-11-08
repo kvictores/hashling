@@ -1,33 +1,58 @@
-// Wearable layers (hat, collar, accessory). Artwork lives in items.json (shared with the extension); each fragment is
-// authored in a canonical frame and mapped onto the pet by an anchor from pets.json (see geometry.ts).
-import ITEMS from './items.json'
-import { anchorTransform, type AnchorName, type WorldAnchor } from './geometry'
-
-type Group = Record<string, string>
-const hats = ITEMS.hat as Group
-const collars = ITEMS.collar as Group
-const accBehind = ITEMS.accessory_behind as Group
-const accFront = ITEMS.accessory_front as Group
-const accFrame = ITEMS.accessory_frame as Record<string, AnchorName>
+// Wearable layers, driven by the registry in items.json (v2): isolated PNG artwork + a mount per item.
+// Layer order, back to front: behindPet, [pet], frontStraps, frontAccessory, collar, hat (Hashling.tsx draws the pet).
+import type { Equipped, Stage } from '../api'
+import { anchorTransform, mountFor, STRAP_SVG, WEARABLES, wearableTransform, wearableUrl, type AnchorName, type Layer, type WorldAnchor } from './geometry'
 
 type Anchors = Record<AnchorName, WorldAnchor> | null
 
-function Wear({ markup, anchor, uid }: { markup?: string; anchor?: WorldAnchor; uid: string }) {
-  if (!markup || !anchor) return null
-  return <g transform={anchorTransform(anchor)} dangerouslySetInnerHTML={{ __html: markup.split('{{uid}}').join(uid) }} />
-}
+/** Equipped ids (one per slot) whose registry layer is `layer`. */
+const idsFor = (equipped: Equipped, layer: Layer) =>
+  [equipped.accessory, equipped.collar, equipped.hat].filter((id): id is string => !!id && WEARABLES[id]?.layer === layer)
 
-interface LayerProps { item?: string; anchors: Anchors; uid: string }
-
-/** Hats: head frame, sit on the crown between the ears. */
-export function HatLayer({ item, anchors, uid }: LayerProps) { return <Wear markup={item ? hats[item] : undefined} anchor={anchors?.crown} uid={`${uid}h`} /> }
-/** Collars: neck frame, around the base of the neck below the chin. */
-export function CollarLayer({ item, anchors, uid }: LayerProps) { return <Wear markup={item ? collars[item] : undefined} anchor={anchors?.neck} uid={`${uid}c`} /> }
-/** Accessory parts that sit behind the pet (backpack panels behind the shoulders). */
-export function AccessoryBehind({ item, anchors, uid }: LayerProps) {
-  return <Wear markup={item ? accBehind[item] : undefined} anchor={item ? anchors?.[accFrame[item]] : undefined} uid={`${uid}b`} />
-}
-/** Accessory parts in front of the pet (straps, chest shield, magnifier). */
-export function AccessoryFront({ item, anchors, uid }: LayerProps) {
-  return <Wear markup={item ? accFront[item] : undefined} anchor={item ? anchors?.[accFrame[item]] : undefined} uid={`${uid}a`} />
+export function WearLayer({ layer, equipped, anchors, stage, uid }: { layer: Layer; equipped: Equipped; anchors: Anchors; stage: Stage; uid: string }) {
+  if (!anchors) return null
+  // code-native straps live on their own layer and are generated from the same shared anchors
+  if (layer === 'frontStraps') {
+    return (
+      <>
+        {[equipped.accessory].filter(Boolean).map(id => {
+          const sid = id && WEARABLES[id]?.straps
+          const s = sid ? STRAP_SVG[sid] : undefined
+          return s && anchors[s.anchor] ? (
+            <g key={sid} transform={anchorTransform(anchors[s.anchor])} dangerouslySetInnerHTML={{ __html: s.markup.split('{{uid}}').join(`${uid}s`) }} />
+          ) : null
+        })}
+      </>
+    )
+  }
+  return (
+    <>
+      {idsFor(equipped, layer).map(id => {
+        const w = WEARABLES[id]
+        const t = wearableTransform(w, stage, anchors)
+        if (!t) return null
+        const fade = mountFor(w, stage).mask
+        const [x0, , x1] = w.alphaBounds
+        const mid = `${uid}-${id}-m`
+        return (
+          <g key={id} data-wearable={id} transform={t}>
+            {fade ? (
+              <defs>
+                <linearGradient id={`${mid}g`} gradientUnits="userSpaceOnUse" x1={x0} x2={x1} y1="0" y2="0">
+                  <stop offset="0" stopColor="#000" />
+                  <stop offset={fade} stopColor="#fff" />
+                  <stop offset={1 - fade} stopColor="#fff" />
+                  <stop offset="1" stopColor="#000" />
+                </linearGradient>
+                <mask id={mid} maskUnits="userSpaceOnUse" x="0" y="0" width={w.width} height={w.height}>
+                  <rect x="0" y="0" width={w.width} height={w.height} fill={`url(#${mid}g)`} />
+                </mask>
+              </defs>
+            ) : null}
+            <image href={wearableUrl(w.file)} x={0} y={0} width={w.width} height={w.height} mask={fade ? `url(#${mid})` : undefined} aria-hidden />
+          </g>
+        )
+      })}
+    </>
+  )
 }
