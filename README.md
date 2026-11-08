@@ -1,7 +1,6 @@
 # Hashling 🐾
 
 **A cyber-pet that lives in your browser.** Hashling catches scams, phishing and malware, and grows as you get smarter about security.
-Built for HackUTD (T-Mobile "Safe Signal" track).
 
 - **Protective:** a Chrome extension flags risky pages, links and emails (red / yellow), explains *why*, shows its confidence and what to do next.
 - **Preventive:** a website with 3 daily security questions. Points grow your pet (egg → kitten → cub → adult) and buy customizations.
@@ -132,3 +131,6 @@ The main set was written while building the rules, so its score is optimistic. T
 - Item artwork lives in `web/src/hashling/items.json`. After editing it, run `python scripts/sync_items.py` to update the extension.
 - Uvicorn's `--reload` was unreliable on Windows during development; restart the server after backend changes.
 - All brands (SwiftShip Parcel, MegaMart, Northbridge Bank, MetroToll, CloudNest, …) and all data are fictional. No third-party logos are used.
+
+## License
+Hashling is licensed under the [MIT License](https://opensource.org/licenses/MIT).
