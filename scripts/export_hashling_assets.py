@@ -2,7 +2,10 @@
 
 Dev-only tool (needs Pillow: `pip install pillow`); the exported files are committed, so nothing at runtime depends on it.
 Usage from the repo root:
-    python scripts/export_hashling_assets.py "/path/to/hashling-visual-kit-v2/assets"
+    python scripts/export_hashling_assets.py "/path/to/hashling-visual-kit-v2/assets" ["/path/to/hashling-accessories-v1"]
+
+The optional accessories pack adds the approved playful v4 adult (reference/), the ten isolated wearable PNGs
+(assets/) and the head-icon that replaces the visual kit's.
 
 * pets / icons keep their alpha channel and are resized to a web-friendly size
 * opaque scenes (den, quiz backdrop) are exported as JPEG
@@ -17,10 +20,10 @@ ROOT = Path(__file__).resolve().parent.parent
 WEB = ROOT / "web/public/assets/hashling"
 EXT = ROOT / "extension/assets/hashling"
 
-PETS = [
-    "hashling-egg", "hashling-kitten", "hashling-cub", "hashling-cub-alert",
-    "hashling-adult-classic-v3", "hashling-adult-moss-v3", "hashling-adult-amber-v3", "hashling-adult-cyan-v3",
-]
+PETS = ["hashling-egg", "hashling-kitten", "hashling-cub", "hashling-cub-alert"]
+ADULTS = ["hashling-adult-classic-v4", "hashling-adult-moss-v4", "hashling-adult-amber-v4", "hashling-adult-cyan-v4"]
+WEARABLES = ["hat_sprout", "hat_visor", "hat_flower", "hat_antenna", "collar_bell", "collar_vine", "collar_led",
+             "acc_solar", "acc_glass", "acc_shield"]
 ICONS = ["sun-coin", "streak-flame", "protection-shield"]
 
 
@@ -34,7 +37,7 @@ def resized(im: Image.Image, size) -> Image.Image:
     return im.resize(size, Image.LANCZOS)
 
 
-def main(src: Path):
+def main(src: Path, acc: Path | None):
     # Trim the fringe: stray, almost-transparent pixels would otherwise add haze around the pets on light backgrounds.
     def load(name):
         im = Image.open(src / f"{name}.png").convert("RGBA")
@@ -48,6 +51,20 @@ def main(src: Path):
         save_png(resized(im, (768, 768)), WEB / f"{n}.png")
         save_png(resized(im, (384, 384)), EXT / f"{n}.png")
 
+    if acc:
+        print("approved v4 adults (web 768px, extension 384px)")
+        for n in ADULTS:
+            im = Image.open(acc / "reference" / f"{n}.png").convert("RGBA")
+            im.putalpha(im.getchannel("A").point(lambda v: 0 if v < 10 else v))
+            save_png(resized(im, (768, 768)), WEB / f"{n}.png")
+            save_png(resized(im, (384, 384)), EXT / f"{n}.png")
+        print("wearables (longest side: web 900px, extension 450px; alpha untouched)")
+        for n in WEARABLES:
+            im = Image.open(acc / "assets" / f"{n}.png").convert("RGBA")
+            for dest, longest in ((WEB / "wearables", 900), (EXT / "wearables", 450)):
+                k = longest / max(im.size)
+                save_png(resized(im, (round(im.width * k), round(im.height * k))), dest / f"{n}.png")
+
     print("icons (web 256px, extension 128px)")
     for n in ICONS:
         im = load(n)
@@ -55,6 +72,8 @@ def main(src: Path):
         save_png(resized(im, (128, 128)), EXT / f"{n}.png")
 
     head = load("hashling-head-icon")
+    if acc:
+        head = Image.open(acc / "assets" / "hashling-head-icon.png").convert("RGBA")
     save_png(resized(head, (256, 256)), WEB / "hashling-head-icon.png")
     save_png(resized(head, (128, 128)), EXT / "hashling-head-icon.png")
 
@@ -85,6 +104,6 @@ def main(src: Path):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) not in (2, 3):
         raise SystemExit(__doc__)
-    main(Path(sys.argv[1]))
+    main(Path(sys.argv[1]), Path(sys.argv[2]) if len(sys.argv) == 3 else None)
