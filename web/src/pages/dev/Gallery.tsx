@@ -13,12 +13,29 @@ const ITEMS: [Slot, string][] = [
 /** Hidden dev page. /dev/hashling = stage x mood grid; /dev/hashling?items=1 = every item on kitten/cub/adult. */
 export default function Gallery() {
   const q = new URLSearchParams(window.location.search)
+  const parseEq = (str: string | null) => {
+    const eq: Equipped = {}
+    for (const id of (str ?? '').split(',').filter(Boolean)) {
+      const slot = id.startsWith('fur') ? 'fur' : id.startsWith('hat') ? 'hat' : id.startsWith('collar') ? 'collar' : id.startsWith('acc') ? 'accessory' : 'background'
+      eq[slot] = id
+    }
+    return eq
+  }
+  const one = q.get('one')
+  if (one) {
+    // /dev/hashling?one=adult&mood=happy&size=600&eq=hat_visor,collar_led -> one large pet (for alignment checks)
+    return (
+      <div className="inline-block bg-white p-2" id="one">
+        <Hashling stage={one as Stage} mood={(q.get('mood') as Mood) ?? 'happy'} equipped={parseEq(q.get('eq'))} size={Number(q.get('size') ?? 600)} animated={false} />
+      </div>
+    )
+  }
   if (q.get('items')) {
     return (
-      <div className="grid grid-cols-6 gap-2 p-4">
+      <div className="grid grid-cols-3 gap-2 p-4 md:grid-cols-6">
         {ITEMS.map(([slot, id]) => (['kitten', 'cub', 'adult'] as Stage[]).map(st => (
           <div key={id + st} className="glass rounded-xl p-1 text-center">
-            <Hashling stage={st} mood={id === 'hat_antenna' ? 'alert' : 'happy'} equipped={{ [slot]: id }} size={150} animated={false} />
+            <Hashling stage={st} mood="happy" equipped={{ [slot]: id }} size={230} animated={false} />
             <div className="data text-[10px]">{id} · {st}</div>
           </div>
         )))}
