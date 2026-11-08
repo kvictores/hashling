@@ -1,16 +1,38 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Mood, User } from '../api'
 import { Hashling } from '../hashling/Hashling'
+import { assetUrl } from '../hashling/geometry'
 
-interface Props { user: User; results: (boolean | null)[]; pop: { key: number; pts: number } | null }
+interface Props { user: User; results: (boolean | null)[]; pop: { key: number; pts: number } | null; done?: boolean }
 
-// Ledges from the ground (0) to the sunlit top (3). x/y are % of the tower box.
+// Ledges from the start platform (0) to the sunlit top (3). x = % of the box width (ledge centre),
+// y = % of the box height measured from the bottom (the line Hashling's paws stand on).
+// positionAfter() below is the single source of movement: correct = up one ledge, wrong = down one (never below 0).
 const LEDGES = [
-  { x: 50, y: 3 },
-  { x: 30, y: 29 },
-  { x: 70, y: 54 },
-  { x: 48, y: 79 },
+  { x: 50, y: 12 },
+  { x: 28, y: 33 },
+  { x: 67, y: 54 },
+  { x: 38, y: 75 },
 ]
+// Same four ledges for the compact mobile strip (a short, wide crop of the same scene).
+const LEDGES_STRIP = [
+  { x: 11, y: 14 },
+  { x: 34, y: 27 },
+  { x: 57, y: 40 },
+  { x: 80, y: 53 },
+]
+
+/**
+ * One coordinate system per layout, in container-query units (1cqw = 1% of the climb box width), so platforms, paws and
+ * the hop all scale together. `ledgeStand` = how far below the top of a ledge image its walking surface lies (the PNG has
+ * transparent margins + the grass thickness); calibrated from the supplied quiz-garden-ledge.png (aspect 3:1).
+ */
+const LAYOUT = {
+  tower: { ratio: '720 / 1350', ledges: LEDGES, ledgeW: 50, pet: 35, egg: 25, reward: { x: 76, y: 86, w: 21 } },
+  strip: { ratio: '358 / 172', ledges: LEDGES_STRIP, ledgeW: 22, pet: 22, egg: 16, reward: { x: 93, y: 68, w: 14 } },
+} as const
+const LEDGE_ASPECT = 3
+const LEDGE_STAND = 0.4 // walking surface sits 40% down the ledge image (0.6 of its height remains below the paws)
 
 function positionAfter(results: (boolean | null)[]) {
   let p = 0
@@ -21,15 +43,33 @@ function positionAfter(results: (boolean | null)[]) {
   return p
 }
 
+function useMedia(query: string) {
+  const [m, setM] = useState(() => typeof window !== 'undefined' && window.matchMedia(query).matches)
+  useEffect(() => {
+    const mq = window.matchMedia(query)
+    const h = () => setM(mq.matches)
+    h()
+    mq.addEventListener('change', h)
+    return () => mq.removeEventListener('change', h)
+  }, [query])
+  return m
+}
+
 /**
- * Solarpunk vine tower beside the quiz. Correct answer -> Hashling climbs one ledge and a coin pops.
- * Wrong answer -> she slips down a ledge with a little tumble. Purely visual: no points are lost.
+ * Greenhouse climb beside the quiz. Correct answer -> Hashling hops up one ledge, a sun coin pops with the real points and
+ * the ledge pulses cyan. Wrong answer -> a gentle slip/bump (no points are lost). Reaching the top lights the gold shield;
+ * finishing the quiz is shown separately so a run with misses never claims the top was reached.
  */
-export function ClimbTower({ user, results, pop }: Props) {
+export function ClimbTower({ user, results, pop, done = false }: Props) {
+  const desktop = useMedia('(min-width: 1024px)')
+  const reduced = useMedia('(prefers-reduced-motion: reduce)')
+  const lay = LAYOUT[desktop ? 'tower' : 'strip']
   const answered = results.filter(r => r !== null)
   const pos = positionAfter(answered)
   const [anim, setAnim] = useState<'climb' | 'fall' | 'bump' | null>(null)
   const [mood, setMood] = useState<Mood>('happy')
+  const [note, setNote] = useState<string | null>(null)
+  const [pulse, setPulse] = useState<{ i: number; key: number } | null>(null)
   const prevCount = useRef(answered.length)
   const prevPos = useRef(pos)
 
@@ -37,97 +77,76 @@ export function ClimbTower({ user, results, pop }: Props) {
     if (answered.length > prevCount.current) {
       const last = answered[answered.length - 1]
       const kind = last ? 'climb' : pos === prevPos.current ? 'bump' : 'fall'
-      setAnim(kind)
+      setAnim(reduced ? null : kind) // reduced motion: jump straight to the new ledge, feedback is the static note + coin chip
       setMood(last ? 'happy' : 'sad')
+      setNote(last ? `Nice hop!${pop ? ` +${pop.pts} points` : ''}` : 'Not quite. No points lost, that’s how we learn.')
+      if (last) setPulse({ i: pos, key: Date.now() })
       const t = setTimeout(() => { setAnim(null); setMood('happy') }, 1400)
+      const n = setTimeout(() => setNote(null), 4200)
       prevCount.current = answered.length
       prevPos.current = pos
-      return () => clearTimeout(t)
+      return () => { clearTimeout(t); clearTimeout(n) }
     }
     prevCount.current = answered.length
     prevPos.current = pos
   }, [answered.length, pos]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const atTop = pos === LEDGES.length - 1
-  const L = LEDGES[pos]
+  const top = LEDGES.length - 1
+  const atTop = pos === top
+  const L = lay.ledges[pos]
   const stage = user.stage
+  const petW = stage === 'egg' ? lay.egg : lay.pet
+  const showCoin = pop && (anim === 'climb' || (reduced && note?.startsWith('Nice')))
+  const caption = atTop ? 'Reached the sunny top!' : done ? `Quiz complete · reached ledge ${pos} of ${top}` : note ?? `ledge ${pos} / ${top}`
 
   return (
-    <div className="relative mx-auto h-[540px] w-full max-w-[320px] select-none" aria-label={`Climbing tower: ledge ${pos} of ${LEDGES.length - 1}`} role="img">
-      <TowerArt lit={pos} />
+    <div className="mx-auto w-full max-w-[360px] select-none lg:max-w-[340px]">
+      <div className="relative w-full overflow-hidden rounded-[1.6rem] border border-leaf/15 bg-sky shadow-[0_10px_26px_-16px_rgba(32,61,53,0.5)]"
+        style={{ aspectRatio: lay.ratio, containerType: 'inline-size' }}
+        role="img" aria-label={`Greenhouse climb: ledge ${pos} of ${top}${atTop ? ', reached the top' : done ? ', quiz complete' : ''}`}>
+        <img src={assetUrl('quiz-greenhouse-backdrop', 'jpg')} alt="" draggable={false} aria-hidden
+          className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: desktop ? '50% 50%' : '50% 36%' }} />
 
-      {/* Hashling: outer box moves horizontally, inner box vertically -> arcing hop */}
-      <div className="absolute inset-0">
-        <div className="absolute transition-[left] duration-[900ms] ease-in-out" style={{ left: `${L.x}%`, bottom: 0, top: 0 }}>
-          <div className={`absolute -translate-x-1/2 transition-[bottom] ${anim === 'fall' ? 'duration-[900ms] ease-in' : 'duration-[900ms] ease-[cubic-bezier(.3,1.5,.5,1)]'}`}
-            style={{ bottom: `${L.y + 3.2}%`, width: stage === 'egg' ? 74 : 96 }}>
-            <div className={anim === 'climb' ? 'tower-hop' : anim === 'fall' ? 'tower-tumble' : anim === 'bump' ? 'tower-bump' : ''}>
-              <Hashling stage={stage} mood={atTop && !anim ? 'happy' : mood} equipped={user.equipped} size="100%" />
-            </div>
-            {pop && anim === 'climb' && (
-              <div key={pop.key} className="coin-pop pointer-events-none absolute -top-6 left-1/2 flex -translate-x-1/2 items-center gap-1 whitespace-nowrap">
-                <svg width="26" height="26" viewBox="0 0 20 20" aria-hidden><circle cx="10" cy="10" r="9" fill="#F2B33D" stroke="#B7801A" strokeWidth="1.5" /><path d="M10 5 C12 7 13 9 10 15 C7 9 8 7 10 5 Z" fill="#3E8E5A" /></svg>
-                <span className="data font-bold text-leaf">+{pop.pts}</span>
-              </div>
+        {/* gold shield / sun reward: lit only once the top ledge is reached */}
+        <img src={assetUrl('protection-shield')} alt="" aria-hidden draggable={false}
+          className={`absolute -translate-x-1/2 -translate-y-1/2 object-contain transition-[filter,opacity] duration-700 ${atTop ? 'reward-lit' : ''}`}
+          style={{ left: `${lay.reward.x}%`, bottom: `${lay.reward.y}%`, width: `${lay.reward.w}cqw`, transform: 'translate(-50%, 50%)',
+            filter: atTop ? undefined : 'grayscale(0.85) opacity(0.55)' }} />
+
+        {/* four separate ledge platforms (start + 3 climb ledges) */}
+        {lay.ledges.map((l, i) => (
+          <div key={i} className="absolute" style={{ left: `${l.x}%`, bottom: `calc(${l.y}% - ${((lay.ledgeW / LEDGE_ASPECT) * (1 - LEDGE_STAND)).toFixed(2)}cqw)`, width: `${lay.ledgeW}cqw`, transform: 'translateX(-50%)' }}>
+            <img src={assetUrl('quiz-garden-ledge')} alt="" draggable={false} aria-hidden className="block w-full" />
+            {i > 0 && i <= pos && (
+              <span aria-hidden className="pointer-events-none absolute left-1/2 top-[60%] h-[16%] w-[34%] -translate-x-1/2 rounded-full"
+                style={{ background: 'radial-gradient(ellipse, rgba(34,211,197,.75), rgba(34,211,197,0) 70%)', opacity: 0.55 }} />
             )}
-            {anim === 'fall' && <div className="data fade-up absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-semibold text-terra">oops!</div>}
+            {pulse && pulse.i === i && (
+              <span key={pulse.key} aria-hidden className="ledge-pulse pointer-events-none absolute left-1/2 top-[52%] h-[40%] w-[70%] -translate-x-1/2 rounded-full" />
+            )}
+          </div>
+        ))}
+
+        {/* Hashling: outer box moves horizontally, inner box vertically -> arcing hop */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-y-0 transition-[left] duration-[700ms] ease-in-out" style={{ left: `${L.x}%` }}>
+            <div className={`absolute transition-[bottom] ${anim === 'fall' ? 'duration-[700ms] ease-in' : 'duration-[700ms] ease-[cubic-bezier(.3,1.5,.5,1)]'}`}
+              style={{ bottom: `${L.y}%`, width: `${petW}cqw`, transform: 'translate(-50%, 5%)' }}>
+              <div className={anim === 'climb' ? 'tower-hop' : anim === 'fall' ? 'tower-tumble' : anim === 'bump' ? 'tower-bump' : ''}>
+                <Hashling stage={stage} mood={atTop && !anim ? 'happy' : mood} equipped={user.equipped} size="100%" />
+              </div>
+              {showCoin && pop && (
+                <div key={pop.key} className={`pointer-events-none absolute left-1/2 top-[-6%] flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-full bg-panel/90 px-1.5 py-0.5 shadow ${reduced ? '' : 'coin-pop'}`}>
+                  <img src={assetUrl('sun-coin')} alt="" aria-hidden width={22} height={22} className="h-[22px] w-[22px] object-contain" />
+                  <span className="data text-sm font-bold text-leaf">+{pop.pts}</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="absolute inset-x-0 bottom-[-28px] text-center">
-        <span className="data text-sm text-muted">{atTop ? '☀️ Reached the sunny top!' : `ledge ${pos} / ${LEDGES.length - 1}`}</span>
-      </div>
+      <p className="data mt-2 min-h-[1.5rem] text-center text-sm text-muted" aria-live="polite">{caption}</p>
     </div>
-  )
-}
-
-function TowerArt({ lit }: { lit: number }) {
-  return (
-    <svg viewBox="0 0 300 540" className="absolute inset-0 h-full w-full" preserveAspectRatio="none" aria-hidden>
-      <defs>
-        <linearGradient id="tw-sky" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#FCE9C8" />
-          <stop offset="45%" stopColor="#DFF1F0" />
-          <stop offset="100%" stopColor="#EAF4EC" />
-        </linearGradient>
-        <radialGradient id="tw-sun" cx="50%" cy="0%" r="60%">
-          <stop offset="0%" stopColor="#F2B33D" stopOpacity="0.55" />
-          <stop offset="100%" stopColor="#F2B33D" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      <rect x="0" y="0" width="300" height="540" rx="28" fill="url(#tw-sky)" />
-      <rect x="0" y="0" width="300" height="300" rx="28" fill="url(#tw-sun)" />
-      <circle cx="150" cy="22" r="18" fill="#F2B33D" opacity="0.9" />
-      {/* greenhouse frame */}
-      <path d="M28 540 V120 Q150 40 272 120 V540" fill="none" stroke="#9CC9B5" strokeWidth="2" opacity="0.6" />
-      {/* circuit trace that turns into the vine */}
-      <path d="M150 540 V500 H120 V470" fill="none" stroke="#22D3C5" strokeWidth="2" opacity="0.7" />
-      <circle cx="120" cy="470" r="3.5" fill="#22D3C5" className="hl-glow" />
-      {/* main climbing vine */}
-      <path d="M150 530 C80 480 230 420 150 360 C70 300 230 240 150 180 C90 135 200 110 150 70"
-        fill="none" stroke="#3E8E5A" strokeWidth="7" strokeLinecap="round" />
-      <path d="M150 530 C80 480 230 420 150 360 C70 300 230 240 150 180 C90 135 200 110 150 70"
-        fill="none" stroke="#6FAF6B" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="2 12" />
-      <g fill="#6FAF6B" stroke="#2C6B42" strokeWidth="1.2">
-        {[[118, 470, -30], [192, 420, 30], [110, 330, -40], [196, 260, 35], [120, 200, -25], [180, 130, 30], [128, 96, -20]].map(([x, y, r], i) => (
-          <ellipse key={i} cx={x} cy={y} rx="12" ry="6" transform={`rotate(${r} ${x} ${y})`} />
-        ))}
-      </g>
-      {/* ledges: planters with solar strips, lighting up as she climbs */}
-      {LEDGES.map((l, i) => {
-        const cx = (l.x / 100) * 300
-        const cy = 540 - (l.y / 100) * 540
-        const on = i <= lit
-        return (
-          <g key={i}>
-            <rect x={cx - 52} y={cy - 4} width="104" height="16" rx="8" fill={i === 0 ? '#D9C9A3' : '#B5764F'} stroke="#4A4A55" strokeWidth="2" />
-            {i > 0 && <rect x={cx - 40} y={cy + 1} width="80" height="5" rx="2" fill={on ? '#22D3C5' : '#1E3A5F'} className={on ? 'hl-glow' : ''} />}
-            {i > 0 && <path d={`M${cx - 46} ${cy - 4} c3 -14 10 -14 10 0 M${cx + 36} ${cy - 4} c3 -12 10 -12 10 0`} fill="#3E8E5A" />}
-            {i === LEDGES.length - 1 && <path d={`M${cx + 30} ${cy - 4} V${cy - 46} l18 7 l-18 7`} fill={on ? '#F2B33D' : '#D8D3C8'} stroke="#4A4A55" strokeWidth="1.5" />}
-          </g>
-        )
-      })}
-    </svg>
   )
 }
