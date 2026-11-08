@@ -1,0 +1,124 @@
+/* Hashling warning UI. Injected into closed Shadow DOM roots, so host-page CSS can't touch it.
+ * No web fonts are fetched (privacy): brand fonts are used when the page already has them, system fonts otherwise. */
+
+:host { all: initial; }
+* { box-sizing: border-box; }
+
+.hl-overlay, .hl-toast, .hl-banner, .hl-tip {
+  --cream: #FBF7EE; --leaf: #3E8E5A; --leaf-dark: #2C6B42; --moss: #6FAF6B; --sun: #F2B33D; --terra: #D9734E;
+  --sky: #BFE3E8; --cyan: #22D3C5; --ink: #23332A; --muted: #5F6F64; --red: #D9463B; --yellow: #F2B33D;
+  font-family: "Space Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--ink); line-height: 1.45; font-size: 15px; text-align: left;
+}
+h1, h2 { font-family: "Fraunces", Georgia, serif; margin: 0; letter-spacing: -0.01em; }
+
+/* ------------------------------------------------ red full-page modal */
+.hl-overlay {
+  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px;
+  background: radial-gradient(900px 500px at 50% 0%, rgba(217,70,59,.35), rgba(35,51,42,.72));
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  animation: hl-fade .25s ease both;
+}
+.hl-modal {
+  width: min(680px, 100%); max-height: calc(100vh - 32px); overflow: auto;
+  background: var(--cream); border-radius: 28px; padding: 28px 30px 20px;
+  border: 3px solid var(--red);
+  box-shadow: 0 30px 80px -20px rgba(0,0,0,.5), 0 0 0 8px rgba(217,70,59,.18);
+  animation: hl-pop .4s cubic-bezier(.2,1.4,.4,1) both;
+}
+.hl-head { display: flex; gap: 18px; align-items: center; }
+.hl-pet { flex: none; width: 150px; height: 150px; }
+.hl-headtext { flex: 1; min-width: 0; }
+.hl-headtext h1 { font-size: 30px; color: var(--red); margin: 6px 0 2px; }
+.hl-cat { margin: 0 0 8px; font-size: 16px; }
+.hl-badge { display: inline-block; padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; font-family: "JetBrains Mono", ui-monospace, monospace; }
+.hl-red { color: var(--red); background: rgba(217,70,59,.1); border: 1.5px solid var(--red); }
+.hl-yellow { color: #8a5d00; background: rgba(242,179,61,.2); border: 1.5px solid var(--yellow); }
+.hl-safe-badge { color: var(--leaf); background: rgba(62,142,90,.12); border: 1.5px solid var(--leaf); }
+.hl-conf { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.hl-bar { flex: 1; height: 8px; background: rgba(35,51,42,.1); border-radius: 99px; overflow: hidden; }
+.hl-bar i { display: block; height: 100%; background: var(--cyan); border-radius: 99px; box-shadow: 0 0 10px rgba(34,211,197,.6); }
+.hl-conf b { color: var(--ink); font-family: "JetBrains Mono", ui-monospace, monospace; }
+.hl-modal h2 { font-size: 18px; margin: 18px 0 8px; }
+.hl-reasons { margin: 0; padding: 0; list-style: none; counter-reset: r; }
+.hl-reasons li { counter-increment: r; display: flex; gap: 10px; background: #fff; border-radius: 12px; padding: 8px 12px; margin-bottom: 6px; }
+.hl-reasons li::before { content: counter(r, decimal-leading-zero); font: 700 12px "JetBrains Mono", monospace; color: var(--red); padding-top: 2px; }
+.hl-unc { margin: 12px 0 0; padding: 10px 12px; border: 1.5px dashed rgba(35,51,42,.25); border-radius: 14px; background: rgba(191,227,232,.4); font-size: 14px; }
+.hl-steps { margin: 0; padding-left: 20px; }
+.hl-steps li { margin: 3px 0; }
+.hl-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 22px; }
+.hl-safe {
+  font: 700 17px "Space Grotesk", sans-serif; color: #fff; background: var(--leaf); border: 0; border-radius: 999px;
+  padding: 14px 26px; cursor: pointer; transition: background .2s, box-shadow .2s, transform .1s;
+}
+.hl-safe span { margin-left: 8px; font: 600 12px "JetBrains Mono", monospace; background: rgba(255,255,255,.2); padding: 3px 8px; border-radius: 99px; }
+.hl-safe:hover, .hl-safe:focus-visible { background: var(--leaf-dark); box-shadow: 0 0 0 3px rgba(34,211,197,.35), 0 0 22px rgba(34,211,197,.45); outline: none; }
+.hl-safe:active { transform: translateY(1px); }
+.hl-ignore { font: 500 13px "Space Grotesk", sans-serif; background: none; border: 0; color: var(--muted); text-decoration: underline; cursor: pointer; padding: 6px; }
+.hl-ignore:focus-visible { outline: 2px solid var(--cyan); border-radius: 6px; }
+.hl-foot { margin: 16px 0 0; font-size: 11px; color: var(--muted); text-align: center; }
+.hl-done { text-align: center; padding: 10px 0 18px; }
+.hl-done h1 { color: var(--leaf); font-size: 32px; }
+.hl-done p { font-size: 16px; }
+.hl-pts { color: var(--leaf); font-family: "JetBrains Mono", monospace; }
+
+/* ------------------------------------------------ yellow toast */
+.hl-toast {
+  position: fixed; right: 20px; bottom: 20px; width: min(380px, calc(100vw - 32px));
+  background: rgba(255,255,255,.94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 2px solid var(--yellow); border-radius: 22px; padding: 12px 14px;
+  box-shadow: 0 18px 50px -15px rgba(0,0,0,.35); animation: hl-slide .35s ease both;
+}
+.hl-toast.hl-out { animation: hl-slideout .35s ease both; }
+.hl-toast-row { display: flex; gap: 10px; align-items: flex-start; }
+.hl-face { flex: none; width: 64px; height: 64px; }
+.hl-toast-body { flex: 1; min-width: 0; }
+.hl-one { margin: 6px 0 4px; font-size: 14px; font-weight: 500; }
+.hl-link { background: none; border: 0; padding: 0; color: var(--leaf); font: 700 13px "Space Grotesk", sans-serif; text-decoration: underline; cursor: pointer; }
+.hl-x { background: none; border: 0; font-size: 22px; line-height: 1; color: var(--muted); cursor: pointer; padding: 0 4px; }
+.hl-details { margin-top: 8px; border-top: 1px solid rgba(35,51,42,.1); padding-top: 8px; font-size: 13.5px; max-height: 50vh; overflow: auto; }
+.hl-details .hl-reasons li { background: rgba(242,179,61,.1); }
+.hl-details .hl-reasons li::before { color: #8a5d00; }
+.hl-details .hl-unc { font-size: 13px; }
+
+/* ------------------------------------------------ email banner */
+.hl-banner {
+  display: flex; gap: 12px; align-items: flex-start; border-radius: 16px; padding: 12px 16px; margin: 0 0 16px;
+  border: 2px solid; background: #fff; animation: hl-fade .3s ease both;
+}
+.hl-banner.red { border-color: var(--red); background: #fff5f4; }
+.hl-banner.yellow { border-color: var(--yellow); background: #fffaf0; }
+.hl-banner.safe { border-color: var(--leaf); background: #f3faf5; }
+.hl-banner .hl-face { width: 56px; height: 56px; }
+.hl-banner-body { flex: 1; min-width: 0; }
+.hl-banner-title { font-weight: 700; font-size: 15px; margin: 4px 0 2px; }
+.hl-banner .hl-reasons { margin-top: 6px; }
+.hl-banner .hl-reasons li { padding: 5px 10px; font-size: 13.5px; }
+.hl-banner .hl-steps { font-size: 13.5px; margin-top: 6px; }
+.hl-banner .hl-unc { font-size: 12.5px; margin-top: 8px; padding: 6px 10px; }
+.hl-banner-actions { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+.hl-btn-small { font: 700 13px "Space Grotesk", sans-serif; border: 0; border-radius: 999px; padding: 8px 14px; cursor: pointer; background: var(--leaf); color: #fff; }
+.hl-btn-small.ghost { background: transparent; color: var(--muted); border: 1px solid rgba(35,51,42,.2); }
+.hl-btn-small:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+/* ------------------------------------------------ link-hover tooltip */
+.hl-tip {
+  position: fixed; pointer-events: none; display: flex; align-items: center; gap: 6px;
+  background: var(--ink); color: #fff; font-size: 13px; font-weight: 600; padding: 6px 10px 6px 6px; border-radius: 12px;
+  box-shadow: 0 8px 24px -8px rgba(0,0,0,.5); border: 1.5px solid var(--red); animation: hl-fade .15s ease both;
+}
+.hl-tip .hl-face { width: 28px; height: 28px; }
+
+@keyframes hl-fade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes hl-pop { from { transform: scale(.88); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+@keyframes hl-slide { from { transform: translateY(20px); opacity: 0 } to { transform: none; opacity: 1 } }
+@keyframes hl-slideout { to { transform: translateY(20px); opacity: 0 } }
+
+@media (max-width: 560px) {
+  .hl-head { flex-direction: column; text-align: center; }
+  .hl-modal { padding: 20px 18px 14px; }
+  .hl-headtext h1 { font-size: 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hl-overlay, .hl-modal, .hl-toast, .hl-banner, .hl-tip { animation: none !important; }
+}

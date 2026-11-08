@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+backend/.env
+backend/hashling.db
+node_modules/
+web/dist/
+.DS_Store
+PROMPT.md

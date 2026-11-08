@@ -1,0 +1,68 @@
+{
+  "package_delivery": {
+    "label": "Package delivery scam",
+    "description": "Fake delivery notices that claim a parcel is held until you pay a small fee or confirm your address.",
+    "red_flags": ["A tiny 'redelivery' or 'customs' fee you weren't expecting", "Tracking link that isn't the carrier's real website"],
+    "next_steps": ["Don't tap the link", "Check tracking in the carrier's official app or by typing its address yourself", "Forward the text to 7726 (SPAM), then delete it"]
+  },
+  "bank_impersonation": {
+    "label": "Bank impersonation",
+    "description": "Messages or calls pretending to be your bank's fraud team to steal logins, codes or money.",
+    "red_flags": ["Pressure to act right now to 'protect' or 'unlock' your account", "Asks you to read back a code or move money to a 'safe' account"],
+    "next_steps": ["Don't reply or call numbers in the message", "Call the number on the back of your card or open your bank's official app", "Never share one-time codes with anyone"]
+  },
+  "toll_fee": {
+    "label": "Unpaid toll / fee scam",
+    "description": "Texts claiming you owe a small toll, parking or ticket fee with a threat of big late penalties.",
+    "red_flags": ["Small balance plus a big threatened late fee", "Payment link on an odd domain, not the agency's official site"],
+    "next_steps": ["Don't tap the link", "Log in to your toll account through its official website or app", "Forward the text to 7726 (SPAM)"]
+  },
+  "prize_giveaway": {
+    "label": "Prize / giveaway scam",
+    "description": "'You won' messages that ask for card details, a shipping fee or personal info to claim a reward.",
+    "red_flags": ["You won something you never entered", "Asks for a fee or card number to 'release' the prize"],
+    "next_steps": ["Don't enter card or personal details", "Check the store's official site or app for real promotions", "Delete the message"]
+  },
+  "job_offer": {
+    "label": "Fake job offer",
+    "description": "Too-good-to-be-true remote jobs that end in paying 'fees', laundering money or handing over ID.",
+    "red_flags": ["High pay for little work and no interview", "Asks you to pay for equipment or move to a chat app"],
+    "next_steps": ["Don't pay any fee or share ID documents", "Look up the company yourself and apply through its official careers page", "Report the message to the platform it came from"]
+  },
+  "tech_support": {
+    "label": "Tech support scam",
+    "description": "Fake virus alerts, renewal invoices or 'refund' notices that push you to call or install remote-access tools.",
+    "red_flags": ["Unexpected invoice or virus alert with a phone number to call", "Asks you to install remote-access software or 'update' files"],
+    "next_steps": ["Don't call the number or install anything", "Close the page; check subscriptions in the vendor's official account page", "If you already gave access, disconnect and run a trusted security scan"]
+  },
+  "account_verification": {
+    "label": "Account verification phish",
+    "description": "'Verify your account', 'mailbox full' or 'password expires' messages leading to fake login pages.",
+    "red_flags": ["Threat that your account will be locked or deleted", "Login link whose domain doesn't match the service"],
+    "next_steps": ["Don't log in through the link", "Open the service by typing its address or using the app", "If you entered a password, change it and turn on MFA"]
+  },
+  "gift_card_request": {
+    "label": "Gift card / urgent payment request",
+    "description": "Someone posing as a boss, relative or official asks you to buy gift cards or send money fast and quietly.",
+    "red_flags": ["Asks for gift cards, wire or crypto as payment", "Secrecy and urgency: 'don't tell anyone, I need it now'"],
+    "next_steps": ["Don't buy gift cards or send money", "Verify by calling the person on a number you already know", "Report it to your workplace IT or security team if it came at work"]
+  },
+  "romance": {
+    "label": "Romance scam",
+    "description": "An online love interest builds trust, then needs money for travel, customs, medical bills or 'investments'.",
+    "red_flags": ["Avoids video calls or meeting in person", "Emergencies that can only be solved with your money"],
+    "next_steps": ["Don't send money or gifts", "Talk to a friend or family member you trust", "Report the profile on the app or site where you met"]
+  },
+  "crypto_investment": {
+    "label": "Crypto / investment scam",
+    "description": "Promises of guaranteed or fast returns on crypto or trading platforms you've never heard of.",
+    "red_flags": ["Guaranteed returns or 'double your money'", "Pressure to deposit more or pay a fee to withdraw"],
+    "next_steps": ["Don't deposit or 'pay to withdraw'", "Only use regulated, well-known platforms you find yourself", "Stop contact and report it"]
+  },
+  "legitimate": {
+    "label": "Looks legitimate",
+    "description": "No strong scam signals found.",
+    "red_flags": ["Still double-check unexpected requests", "Use the official app if you're unsure"],
+    "next_steps": ["No action needed", "If something feels off, open the official app or site yourself"]
+  }
+}

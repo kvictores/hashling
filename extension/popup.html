@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Hashling</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header>
+    <div class="brand"><img src="icons/icon32.png" alt="" width="24" height="24" /> <span>Hashling</span></div>
+    <label class="switch">
+      <span class="sr">Active user</span>
+      <select id="user" aria-label="Active user"></select>
+    </label>
+  </header>
+
+  <main id="main">
+    <div id="offline" class="offline" hidden>
+      Can’t reach the Hashling backend at <code>localhost:8000</code>.<br />Start it with <code>uvicorn main:app</code>.
+    </div>
+    <section class="pet-card">
+      <div id="pet" class="pet"></div>
+      <p id="speech" class="speech"></p>
+    </section>
+    <section class="stats">
+      <div class="stat"><div class="num" id="streak">–</div><div class="lbl">🔥 day streak</div></div>
+      <div class="stat"><div class="num" id="wallet">–</div><div class="lbl">🪙 wallet</div></div>
+      <div class="stat"><div class="num" id="blocked">–</div><div class="lbl">🛡️ blocked today</div></div>
+    </section>
+    <section class="row">
+      <div>
+        <div class="lbl">Stage</div>
+        <div id="stage" class="val">–</div>
+      </div>
+      <div class="progress"><i id="bar"></i></div>
+    </section>
+    <section class="row quiz">
+      <div>
+        <div class="lbl">Today’s quiz</div>
+        <div id="quiz" class="val">–</div>
+      </div>
+      <div id="dots" class="dots"></div>
+    </section>
+    <button id="open" class="btn">Open Hashling’s Den</button>
+    <p class="foot">Watching this browser for scams · only warning metadata is logged</p>
+  </main>
+  <script src="hashling.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

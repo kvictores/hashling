@@ -1,0 +1,191 @@
+[
+  {
+    "id": "d1-mc", "day": 0, "type": "multiple_choice", "scam_category": "package_delivery", "topic": "Package delivery smishing",
+    "prompt": "A text says: \"SwiftShip: your parcel is on hold, a $1.99 redelivery fee is unpaid. Pay at swiftship-redeliver.top\". What's the safest move?",
+    "options": ["Pay it, it's only $1.99", "Reply STOP so they leave you alone", "Open the official SwiftShip app or type its site yourself to check tracking", "Tap the link just to see if it looks real"],
+    "answer": 2,
+    "explanation": "Tiny fees are the hook: the real goal is your card number. Check tracking through the official app or a site you type yourself. Replying confirms your number is active."
+  },
+  {
+    "id": "d1-tf", "day": 0, "type": "true_false", "scam_category": "bank_impersonation", "topic": "Lookalike domains",
+    "prompt": "\"northbridgebank.com\" and \"northbrigdebank.com\" lead to the same website.",
+    "answer": false,
+    "explanation": "Look closely: \"brigde\" swaps two letters. Lookalike domains differ by one or two characters to fool a quick glance. Use bookmarks or the official app for banking."
+  },
+  {
+    "id": "d1-spot", "day": 0, "type": "spot_the_phish", "scam_category": "toll_fee", "topic": "Toll fee smishing",
+    "prompt": "Tap every red flag in this text message.",
+    "message": {"channel": "sms"},
+    "regions": [
+      {"id": "sender", "part": "sender", "text": "+63 917 555 0102", "flag": true, "required": false, "why": "An overseas personal number, not a toll agency short code."},
+      {"id": "greet", "part": "body", "text": "MetroToll Notice:", "flag": false, "why": "Naming a real-sounding agency isn't a red flag by itself."},
+      {"id": "urgency", "part": "body", "text": "Final notice! Pay within 12 hours to avoid a $50 late fee.", "flag": true, "required": true, "why": "Pressure + a big threatened penalty is the classic toll-scam lever."},
+      {"id": "amount", "part": "body", "text": "Your unpaid toll balance is $4.35.", "flag": false, "why": "A balance alone is normal; it's the pressure and link that give it away."},
+      {"id": "link", "part": "link", "text": "https://metrotoll-pay.icu/pay", "flag": true, "required": true, "why": "The real agency would use its own domain (metrotoll.org), not a '.icu' lookalike."}
+    ],
+    "explanation": "Toll scams pair a small balance with a big penalty and a lookalike link. Log in through the agency's official site or app instead."
+  },
+
+  {
+    "id": "d2-mc", "day": 1, "type": "multiple_choice", "scam_category": "gift_card_request", "topic": "AI voice-clone calls",
+    "prompt": "You get a call that sounds exactly like your nephew. He's crying, says he's in trouble, and needs money sent right now. What's the best first step?",
+    "options": ["Send the money quickly, the voice is definitely his", "Hang up and call him (or a parent) back on a number you already have", "Ask him to text you his bank details", "Buy gift cards so it's faster"],
+    "answer": 1,
+    "explanation": "AI tools can clone a voice from a few seconds of audio. Hang up and call back on a known number, or agree on a family code word ahead of time."
+  },
+  {
+    "id": "d2-tf", "day": 1, "type": "true_false", "scam_category": "account_verification", "topic": "SIM swap",
+    "prompt": "If your phone suddenly shows \"No service\" and you get emails about password resets you didn't request, you could be the victim of a SIM swap and should contact your carrier right away.",
+    "answer": true,
+    "explanation": "In a SIM swap, a criminal moves your number to their SIM so they receive your texts and codes. Call your carrier from another phone and add a port-out PIN."
+  },
+  {
+    "id": "d2-spot", "day": 1, "type": "spot_the_phish", "scam_category": "bank_impersonation", "topic": "Bank alert phishing email",
+    "prompt": "Tap every red flag in this email.",
+    "message": {"channel": "email"},
+    "regions": [
+      {"id": "sender", "part": "sender", "text": "Northbridge Bank <alerts@northbridge-secure-mail.com>", "flag": true, "required": true, "why": "The real bank's domain is northbridgebank.com; this is a lookalike."},
+      {"id": "subject", "part": "subject", "text": "Unusual sign-in detected", "flag": false, "why": "Real banks send sign-in alerts too, so the subject alone isn't proof."},
+      {"id": "greeting", "part": "body", "text": "Dear Valued Customer,", "flag": true, "required": false, "why": "Your bank knows your name. Generic greetings suggest a mass phish."},
+      {"id": "urgency", "part": "body", "text": "Your account will be suspended in 24 hours unless you verify your identity.", "flag": true, "required": true, "why": "Threats and deadlines push you to act before thinking."},
+      {"id": "link", "part": "link", "text": "Verify now: http://northbridge.account-check.xyz", "flag": true, "required": true, "why": "The registered domain is account-check.xyz; the bank name is just a subdomain."},
+      {"id": "signoff", "part": "body", "text": "Thank you, Northbridge Customer Care", "flag": false, "why": "A normal sign-off."}
+    ],
+    "explanation": "Check the sender domain and the real registered domain of links (the part right before .com/.xyz). When in doubt, open your bank's app directly."
+  },
+
+  {
+    "id": "d3-mc", "day": 2, "type": "multiple_choice", "scam_category": "toll_fee", "topic": "QR code scams",
+    "prompt": "A parking meter has a sticker: \"Pay faster! Scan this QR code.\" What's the main risk?",
+    "options": ["None, QR codes are always official", "The sticker may be placed over the real one and lead to a fake payment site", "QR codes can drain your battery", "It will only show an ad"],
+    "answer": 1,
+    "explanation": "Scammers paste their own QR stickers on meters, menus and flyers. Check where the code leads before entering card details, or pay through the official app."
+  },
+  {
+    "id": "d3-tf", "day": 2, "type": "true_false", "scam_category": "account_verification", "topic": "Password reuse",
+    "prompt": "Reusing one strong password on many sites is safe as long as it's long and complex.",
+    "answer": false,
+    "explanation": "If any one of those sites is breached, attackers try that password everywhere (credential stuffing). Use a unique password per site with a password manager."
+  },
+  {
+    "id": "d3-spot", "day": 2, "type": "spot_the_phish", "scam_category": "job_offer", "topic": "Fake job offers",
+    "prompt": "Tap every red flag in this recruiter text.",
+    "message": {"channel": "sms"},
+    "regions": [
+      {"id": "sender", "part": "sender", "text": "+1 (469) 555-0137", "flag": false, "why": "A regular number isn't suspicious by itself."},
+      {"id": "hi", "part": "body", "text": "Hi! I'm Ava from Talent Bridge Staffing.", "flag": false, "why": "An introduction alone isn't a red flag."},
+      {"id": "pay", "part": "body", "text": "Remote role: $450/day, no experience or interview needed.", "flag": true, "required": true, "why": "Very high pay for no experience and no interview is too good to be true."},
+      {"id": "chat", "part": "body", "text": "Message our manager on a private chat app to start today.", "flag": true, "required": false, "why": "Moving you to an encrypted chat app avoids platform safety checks."},
+      {"id": "fee", "part": "body", "text": "Please send a $60 equipment fee to begin.", "flag": true, "required": true, "why": "Real employers never charge you to start a job."}
+    ],
+    "explanation": "Fake job offers promise easy money, skip interviews, and then ask for fees, bank details or ID. Apply through the company's official careers page."
+  },
+
+  {
+    "id": "d4-mc", "day": 3, "type": "multiple_choice", "scam_category": "account_verification", "topic": "MFA fatigue",
+    "prompt": "Your phone shows ten sign-in approval prompts in a row that you didn't start. What should you do?",
+    "options": ["Approve one so they stop", "Deny them all, change your password, and report it", "Turn your phone off and forget about it", "Reply to the notification asking who it is"],
+    "answer": 1,
+    "explanation": "This is MFA fatigue: an attacker already has your password and is spamming prompts hoping you tap Approve. Deny, change the password, and tell your IT team or provider."
+  },
+  {
+    "id": "d4-tf", "day": 3, "type": "true_false", "scam_category": "account_verification", "topic": "Public Wi-Fi",
+    "prompt": "On café Wi-Fi, if your browser shows a certificate warning for your bank's site, it's fine to click \"Continue anyway\" because you know the site.",
+    "answer": false,
+    "explanation": "A certificate warning on a site you know can mean someone on the network is intercepting traffic. Disconnect and use mobile data or a trusted network instead."
+  },
+  {
+    "id": "d4-spot", "day": 3, "type": "spot_the_phish", "scam_category": "prize_giveaway", "topic": "Prize giveaway email",
+    "prompt": "Tap every red flag in this email.",
+    "message": {"channel": "email"},
+    "regions": [
+      {"id": "sender", "part": "sender", "text": "MegaMart Rewards <winner@megamart-rewards-center.com>", "flag": true, "required": true, "why": "MegaMart's real domain is megamart.com, not a 'rewards-center' lookalike."},
+      {"id": "subject", "part": "subject", "text": "You're our lucky winner!", "flag": true, "required": false, "why": "You can't win a contest you never entered."},
+      {"id": "body1", "part": "body", "text": "Thanks for shopping with us this year.", "flag": false, "why": "Friendly filler, not a red flag."},
+      {"id": "fee", "part": "body", "text": "Just cover $4.95 shipping. Enter your card details within 24 hours.", "flag": true, "required": true, "why": "A 'small fee' to claim a prize is how they get your card number."},
+      {"id": "attach", "part": "attachment", "text": "Claim_Form.html", "flag": true, "required": false, "why": "HTML attachments often open fake login or card forms."}
+    ],
+    "explanation": "Real prizes don't require card details or fees. Check promotions in the store's official app."
+  },
+
+  {
+    "id": "d5-mc", "day": 4, "type": "multiple_choice", "scam_category": "tech_support", "topic": "Software update scams",
+    "prompt": "While browsing, a pop-up says \"Your browser is out of date! Download update.exe now.\" What should you do?",
+    "options": ["Download it, updates are important", "Close the page and update only through your browser's settings or official app store", "Call the phone number on the pop-up", "Disable your antivirus first"],
+    "answer": 1,
+    "explanation": "Fake update prompts deliver malware. Browsers and operating systems update themselves through settings, never through random web pop-ups."
+  },
+  {
+    "id": "d5-tf", "day": 4, "type": "true_false", "scam_category": "gift_card_request", "topic": "Gift card payments",
+    "prompt": "A real government agency or utility company may ask you to pay an overdue bill with gift cards.",
+    "answer": false,
+    "explanation": "No legitimate agency or utility takes gift cards as payment. Anyone demanding gift cards, crypto or wire transfers is a scammer."
+  },
+  {
+    "id": "d5-spot", "day": 4, "type": "spot_the_phish", "scam_category": "tech_support", "topic": "Fake renewal invoice",
+    "prompt": "Tap every red flag in this email.",
+    "message": {"channel": "email"},
+    "regions": [
+      {"id": "sender", "part": "sender", "text": "Orbitron Defender <billing.orbitron@outlook.com>", "flag": true, "required": true, "why": "A security company billing you from a free webmail address."},
+      {"id": "subject", "part": "subject", "text": "Your subscription renewed - $399.99", "flag": false, "why": "Receipts are normal, but check the details."},
+      {"id": "thanks", "part": "body", "text": "Thank you for being a loyal customer.", "flag": false, "why": "Polite filler."},
+      {"id": "call", "part": "body", "text": "Didn't authorize this? Call our refund desk at 1-888-555-0136 within 24 hours.", "flag": true, "required": true, "why": "The goal is to get you on the phone and install remote-access tools."},
+      {"id": "attach", "part": "attachment", "text": "Invoice_399.pdf.exe", "flag": true, "required": true, "why": "A double extension: it's a program (.exe) pretending to be a PDF."}
+    ],
+    "explanation": "Fake invoices create panic so you call. Check subscriptions by signing in to the vendor's real site yourself."
+  },
+
+  {
+    "id": "d6-mc", "day": 5, "type": "multiple_choice", "scam_category": "account_verification", "topic": "Lookalike domains",
+    "prompt": "Which of these links actually goes to PayWave's real site (paywave.com)?",
+    "options": ["paywave.com.account-verify.net/login", "paywave-login.co", "paywave.com/login", "paywaye.com/login"],
+    "answer": 2,
+    "explanation": "Read the domain right before the first single slash: 'account-verify.net', 'paywave-login.co' and 'paywaye.com' are all different owners."
+  },
+  {
+    "id": "d6-tf", "day": 5, "type": "true_false", "scam_category": "bank_impersonation", "topic": "Bank alert smishing",
+    "prompt": "You get a code you didn't request, then someone calls \"from your bank\" and asks you to read it back to verify your identity. You should read it to them.",
+    "answer": false,
+    "explanation": "That code is the key to your account. Your bank will never ask you to read it back. Hang up and call the number on your card."
+  },
+  {
+    "id": "d6-spot", "day": 5, "type": "spot_the_phish", "scam_category": "package_delivery", "topic": "Package delivery smishing",
+    "prompt": "Tap every red flag in this text message.",
+    "message": {"channel": "sms"},
+    "regions": [
+      {"id": "sender", "part": "sender", "text": "parcel-alert@mailer-ss.net", "flag": true, "required": false, "why": "Texts sent from email addresses are a common smishing trick."},
+      {"id": "intro", "part": "body", "text": "SwiftShip:", "flag": false, "why": "Brand names are easy to fake but aren't a flag on their own."},
+      {"id": "urgency", "part": "body", "text": "Final attempt! Your package will be returned today.", "flag": true, "required": true, "why": "Urgency to stop you from double-checking."},
+      {"id": "fee", "part": "body", "text": "Pay the $2.49 handling fee to release it.", "flag": true, "required": false, "why": "Unexpected small fees are the bait."},
+      {"id": "link", "part": "link", "text": "https://swlftship.com/confirm", "flag": true, "required": true, "why": "'swlftship' uses an L instead of an I."}
+    ],
+    "explanation": "Look for lookalike spellings, email-address senders and surprise fees. Check tracking in the official app."
+  },
+
+  {
+    "id": "d7-mc", "day": 6, "type": "multiple_choice", "scam_category": "crypto_investment", "topic": "Investment scam trend",
+    "prompt": "A friendly stranger who texted you by \"wrong number\" now shares screenshots of big crypto profits and offers to help you invest on a platform they recommend. This matches which growing scam pattern?",
+    "options": ["A legitimate mentorship", "A long-con investment scam that builds trust, then traps your deposits", "A bank fraud alert", "A software update"],
+    "answer": 1,
+    "explanation": "These long-con scams build a relationship over weeks, show fake gains, then block withdrawals until you pay 'fees'. Only use regulated platforms you found yourself."
+  },
+  {
+    "id": "d7-tf", "day": 6, "type": "true_false", "scam_category": "romance", "topic": "Romance scams",
+    "prompt": "Someone you met online who always avoids video calls and then needs money for a medical emergency is showing common romance-scam signs.",
+    "answer": true,
+    "explanation": "Avoiding video, fast declarations of love and sudden emergencies are classic romance-scam patterns. Never send money to someone you haven't met in person."
+  },
+  {
+    "id": "d7-spot", "day": 6, "type": "spot_the_phish", "scam_category": "account_verification", "topic": "Mailbox full phishing",
+    "prompt": "Tap every red flag in this email.",
+    "message": {"channel": "email"},
+    "regions": [
+      {"id": "sender", "part": "sender", "text": "CloudNest Mail <no-reply@cloudnest-storage-alerts.com>", "flag": true, "required": true, "why": "Not CloudNest's real domain (cloudnest.com)."},
+      {"id": "greeting", "part": "body", "text": "Dear user,", "flag": true, "required": false, "why": "Generic greeting from a service that knows your name."},
+      {"id": "threat", "part": "body", "text": "Your mailbox is full. New messages will be deleted within 24 hours.", "flag": true, "required": true, "why": "Threat + deadline to rush you."},
+      {"id": "link", "part": "link", "text": "Upgrade free: https://cloudnest.mail-upgrade.top/login", "flag": true, "required": true, "why": "The registered domain is mail-upgrade.top."},
+      {"id": "footer", "part": "body", "text": "You're receiving this as a CloudNest member.", "flag": false, "why": "Standard footer text."}
+    ],
+    "explanation": "'Mailbox full' and 'password expiring' emails lead to fake logins. Open the service yourself to check storage."
+  }
+]

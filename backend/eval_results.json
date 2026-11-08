@@ -1,0 +1,59 @@
+{
+  "dataset_size": 100,
+  "hybrid": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "confusion": {
+      "tp": 65,
+      "fp": 0,
+      "tn": 35,
+      "fn": 0
+    }
+  },
+  "baseline": {
+    "accuracy": 0.73,
+    "precision": 0.797,
+    "recall": 0.785,
+    "f1": 0.791,
+    "confusion": {
+      "tp": 51,
+      "fp": 13,
+      "tn": 22,
+      "fn": 14
+    }
+  },
+  "category_accuracy": 0.969,
+  "engine": "heuristic",
+  "generated_at": "2026-11-08 04:00 UTC",
+  "holdout": {
+    "size": 30,
+    "hybrid": {
+      "accuracy": 0.867,
+      "precision": 1.0,
+      "recall": 0.778,
+      "f1": 0.875,
+      "confusion": {
+        "tp": 14,
+        "fp": 0,
+        "tn": 12,
+        "fn": 4
+      }
+    },
+    "baseline": {
+      "accuracy": 0.767,
+      "precision": 0.789,
+      "recall": 0.833,
+      "f1": 0.811,
+      "confusion": {
+        "tp": 15,
+        "fp": 4,
+        "tn": 8,
+        "fn": 3
+      }
+    },
+    "category_accuracy": 0.722,
+    "misses": 4
+  }
+}

@@ -1,0 +1,19 @@
+[
+  {"id": "fur_classic", "slot": "fur", "name": "Classic Snow", "price": 0},
+  {"id": "fur_moss", "slot": "fur", "name": "Moss Green", "price": 40},
+  {"id": "fur_amber", "slot": "fur", "name": "Sunset Amber", "price": 40},
+  {"id": "fur_cyan", "slot": "fur", "name": "Circuit Cyan", "price": 60},
+  {"id": "hat_sprout", "slot": "hat", "name": "Sprout Crown", "price": 30},
+  {"id": "hat_visor", "slot": "hat", "name": "Solar Visor", "price": 50},
+  {"id": "hat_flower", "slot": "hat", "name": "Flower Crown", "price": 40},
+  {"id": "hat_antenna", "slot": "hat", "name": "Antenna Headset", "price": 60},
+  {"id": "collar_bell", "slot": "collar", "name": "Bell Collar", "price": 20},
+  {"id": "collar_vine", "slot": "collar", "name": "Vine Collar", "price": 30},
+  {"id": "collar_led", "slot": "collar", "name": "LED Collar", "price": 50},
+  {"id": "acc_solar", "slot": "accessory", "name": "Solar Panel Backpack", "price": 70},
+  {"id": "acc_glass", "slot": "accessory", "name": "Magnifying Glass", "price": 40},
+  {"id": "acc_shield", "slot": "accessory", "name": "Shield Badge", "price": 50},
+  {"id": "bg_greenhouse", "slot": "background", "name": "Greenhouse", "price": 0},
+  {"id": "bg_rooftop", "slot": "background", "name": "Rooftop Garden", "price": 60},
+  {"id": "bg_neon", "slot": "background", "name": "Neon Greenhouse at Dusk", "price": 80}
+]
