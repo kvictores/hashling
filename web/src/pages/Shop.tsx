@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { api, type Equipped, type ShopItem, type Slot } from '../api'
 import { useUser } from '../UserContext'
 import { Hashling } from '../hashling/Hashling'
-import { wearableUrl, WEARABLES } from '../hashling/geometry'
+import { PIXELATED, wearableUrl, WEARABLES } from '../hashling/geometry'
 import { PetStand, Scene, SceneBackground } from '../hashling/Scene'
 import { FUR } from '../hashling/palettes'
 import { Card, Coin, ProgressBar } from '../components/ui'
@@ -183,7 +183,7 @@ function Thumb({ it, stage }: { it: ShopItem; stage: 'kitten' | 'cub' | 'adult' 
   const [x0, y0, x1, y1] = w.alphaBounds
   return (
     <svg viewBox={`${x0} ${y0} ${x1 - x0} ${y1 - y0}`} className="h-[80%] w-[84%] self-center" role="img" aria-label={it.name} preserveAspectRatio="xMidYMid meet">
-      <image href={wearableUrl(w.file)} x={0} y={0} width={w.width} height={w.height} />
+      <image href={wearableUrl(w.file)} x={0} y={0} width={w.width} height={w.height} style={PIXELATED} />
     </svg>
   )
 }

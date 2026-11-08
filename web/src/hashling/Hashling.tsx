@@ -1,7 +1,7 @@
 import { useId } from 'react'
 import type { Equipped, Mood, Stage } from '../api'
 import { WearLayer } from './items'
-import { assetUrl, GROUND_Y, imageTransform, placement, type WorldAnchor } from './geometry'
+import { GROUND_Y, PIXELATED, pixelUrl, placement, type WorldAnchor } from './geometry'
 
 /** Crop the canvas to the part of the pet an item sits on (shop thumbnails use the same renderer, just zoomed in). */
 export type Focus = 'hat' | 'collar' | 'chest' | 'paw' | 'head'
@@ -27,12 +27,13 @@ export interface HashlingProps {
  * Wearables are SVG fragments mapped onto the PNG's anatomy anchors (pets.json), so the same equipment renders on
  * every stage, every fur and every instance (shop thumbnails, den, quiz, switcher).
  *
- * The art is static: moods are shown with whole-image pose motion plus a small labelled cue badge (and the supplied
- * alert pose for the cub). Nothing pretends the faces move independently.
+ * The pixel art is static: happy = the waving sprite, sleepy = the sleeping sprite, sad/alert = the idle sprite with restrained
+ * whole-image motion plus a small labelled cue badge. Nothing pretends the faces move independently.
  */
 export function Hashling({ stage, mood = 'happy', equipped = {}, size = 200, className, title, animated = true, shadow = true, focus }: HashlingProps) {
   const uid = 'hl' + useId().replace(/[^a-zA-Z0-9]/g, '')
-  const label = title ?? `Hashling the ${stage === 'egg' ? 'egg' : `snow-leopard ${stage}`}, feeling ${mood}`
+  const warn = mood === 'alert' ? ', on alert: warning' : ''
+  const label = title ?? `Hashling the ${stage === 'egg' ? 'egg' : `snow-leopard ${stage}`}, feeling ${mood}${warn}`
   const pl = placement(stage, mood, equipped.fur)
   const a = pl.anchors
   const anim = animated
@@ -40,20 +41,19 @@ export function Hashling({ stage, mood = 'happy', equipped = {}, size = 200, cla
   // whole-image pose per mood (static art -> restrained motion + a labelled cue badge)
   const bodyClass = !anim ? undefined
     : stage === 'egg' ? (mood === 'alert' ? 'hl-shake' : mood === 'sleepy' ? 'hl-breathe-slow' : 'hl-wobble')
-    : mood === 'alert' ? (stage === 'cub' ? 'hl-alert-bob' : 'hl-shake')
+    : mood === 'alert' ? 'hl-alert-bob' // no alert sprite: same stage + gear, restrained bob and the labelled warning badge
     : mood === 'sleepy' ? 'hl-breathe-slow'
     : mood === 'sad' ? 'hl-sad-sway'
     : 'hl-breathe'
   const pivot = `translate(100 ${GROUND_Y}) `
   const unpivot = ` translate(-100 -${GROUND_Y})`
   const pose = stage === 'egg' ? ''
-    : mood === 'alert' && stage !== 'cub' ? `${pivot}scale(1.035)${unpivot}`
     : mood === 'sad' ? `${pivot}scale(1 0.965)${unpivot}`
     : mood === 'sleepy' ? `${pivot}scale(1 0.985)${unpivot}`
     : ''
   const tone = mood === 'sad' ? 'saturate(0.82) brightness(0.97)' : mood === 'sleepy' ? 'brightness(0.97) saturate(0.95)' : undefined
   const cueAt = a ? { x: a.crown.x + 31, y: a.crown.y - 3 } : { x: 154, y: 58 }
-  const shadowRx = stage === 'egg' ? 40 : stage === 'kitten' ? 42 : stage === 'cub' ? 52 : 46
+  const shadowRx = stage === 'egg' ? 40 : stage === 'kitten' ? 48 : stage === 'cub' ? 54 : 62
 
   let viewBox = '0 0 200 200'
   if (focus && a) {
@@ -73,14 +73,12 @@ export function Hashling({ stage, mood = 'happy', equipped = {}, size = 200, cla
       <g className={bodyClass}>
         <g transform={pose || undefined}>
           <g style={tone ? { filter: tone } : undefined}>
-            <WearLayer layer="behindPet" equipped={equipped} anchors={a} stage={stage} uid={uid} pet={pl} />
-            <g transform={imageTransform(pl)}>
-              <image href={assetUrl(pl.file)} x={pl.x} y={pl.y} width={pl.size} height={pl.size} preserveAspectRatio="xMidYMid meet" aria-hidden />
-            </g>
-            <WearLayer layer="frontStraps" equipped={equipped} anchors={a} stage={stage} uid={uid} pet={pl} />
-            <WearLayer layer="frontAccessory" equipped={equipped} anchors={a} stage={stage} uid={uid} pet={pl} />
-            <WearLayer layer="collar" equipped={equipped} anchors={a} stage={stage} uid={uid} pet={pl} />
-            <WearLayer layer="hat" equipped={equipped} anchors={a} stage={stage} uid={uid} pet={pl} />
+            <WearLayer layer="behindPet" equipped={equipped} anchors={a} stage={stage} mood={mood} uid={uid} />
+            <image href={pixelUrl(pl.file)} x={pl.x} y={pl.y} width={pl.w} height={pl.h} preserveAspectRatio="xMidYMid meet" aria-hidden style={PIXELATED} />
+            <WearLayer layer="frontStraps" equipped={equipped} anchors={a} stage={stage} mood={mood} uid={uid} />
+            <WearLayer layer="frontAccessory" equipped={equipped} anchors={a} stage={stage} mood={mood} uid={uid} />
+            <WearLayer layer="collar" equipped={equipped} anchors={a} stage={stage} mood={mood} uid={uid} />
+            <WearLayer layer="hat" equipped={equipped} anchors={a} stage={stage} mood={mood} uid={uid} />
           </g>
         </g>
       </g>

@@ -3,72 +3,62 @@
 import PETS from './pets.json'
 import type { Mood, Stage } from '../api'
 
-export type AnchorName = 'crown' | 'neck' | 'chest' | 'shoulders' | 'paw'
+export type AnchorName = 'crown' | 'earL' | 'earR' | 'neck' | 'chest' | 'shoulders' | 'paw'
 interface SrcAnchor { x: number; y: number; s: number; r: number }
 export interface WorldAnchor { x: number; y: number; unit: number; rot: number }
 
 const CANVAS = PETS.canvas
-const SRC = PETS.source
 const GROUND = PETS.ground
 
-/** Browser-safe URL for any exported Hashling art file (works under any Vite base path). */
-export const assetUrl = (file: string, ext: 'png' | 'jpg' = 'png') => `${import.meta.env.BASE_URL}assets/hashling/${file}.${ext}`
+const base = import.meta.env.BASE_URL
+/** UI icons (coin, flame, shield, brand head) are unchanged by the pixel look and live in assets/hashling. */
+export const assetUrl = (file: string, ext: 'png' | 'jpg' = 'png') => `${base}assets/hashling/${file}.${ext}`
+/** Browser-safe URLs (work under any Vite base path) for the pixel art. */
+export const pixelUrl = (file: string) => `${base}assets/hashling/pixel/${file}.png`
+export const backgroundUrl = (file: string) => `${base}assets/hashling/pixel/${file}.png`
+/** Pixel art must never be smoothed. */
+export const PIXELATED = { imageRendering: 'pixelated' } as const
 
 export interface Placement {
   file: string
-  /** top-left + size of the (square) source image in SVG units */
-  x: number; y: number; size: number
-  /** registration of fur variants: scale about the image centre + shift (SVG units) */
+  /** top-left + size of the source image in SVG units */
+  x: number; y: number; w: number; h: number
+  /** kept for the shared wearable code (fur patches); pixel look registers nothing here */
   corr: { s: number; dx: number; dy: number }
   anchors: Record<AnchorName, WorldAnchor> | null
 }
 
-type StageKey = keyof typeof PETS.stages
 type AnchorSet = Record<AnchorName, SrcAnchor>
+interface Sprite { file: string; width: number; height: number; bbox: number[]; anchors?: AnchorSet }
+
+const FUR_SUFFIX: Record<string, string> = { fur_moss: '-moss', fur_amber: '-amber', fur_cyan: '-cyan' }
+/** Sprite for stage + mood. happy -> happy, sleepy -> sleep; sad/alert have no sprite of their own, so they use idle. */
+export const moodKey = (mood: Mood) => (mood === 'happy' ? 'happy' : mood === 'sleepy' ? 'sleep' : 'idle')
 
 export function placement(stage: Stage, mood: Mood, fur: string | undefined): Placement {
-  const st = PETS.stages[stage as StageKey] as {
-    file: string; height: number; bbox: number[]; anchors?: AnchorSet
-    alert?: { file: string; anchors: AnchorSet }
-    furs?: Record<string, { file: string; corr: number[] }>
-  }
-  const [x0, y0, x1, y1] = st.bbox
-  const k = st.height / (y1 - y0)
-  const size = SRC * k
+  const st = PETS.stages[stage as keyof typeof PETS.stages] as { scale: number; moods?: Record<string, Sprite> } & Sprite
+  const sp: Sprite = stage === 'egg' ? st : st.moods![moodKey(mood)]
+  const k = st.scale
+  const [x0, , x1, y1] = sp.bbox
   const x = CANVAS / 2 - k * ((x0 + x1) / 2)
   const y = GROUND - k * y1
-
-  let file = st.file
-  let src: AnchorSet | undefined = st.anchors
-  let corr = { s: 1, dx: 0, dy: 0 }
-  if (stage === 'adult' && st.furs) {
-    const f = st.furs[fur ?? 'fur_classic'] ?? st.furs.fur_classic
-    file = f.file
-    corr = { s: f.corr[0], dx: f.corr[1] * k, dy: f.corr[2] * k }
-  }
-  if (stage === 'cub' && mood === 'alert' && st.alert) {
-    file = st.alert.file
-    src = st.alert.anchors
-  }
+  // fur-only derived sprites; the classic ivory art is the base file. The egg has no fur variants.
+  const file = stage === 'egg' ? sp.file : sp.file + (FUR_SUFFIX[fur ?? ''] ?? '')
   let anchors: Placement['anchors'] = null
-  if (src) {
+  if (sp.anchors) {
     anchors = {} as Record<AnchorName, WorldAnchor>
-    for (const n of Object.keys(src) as AnchorName[]) {
-      const a = src[n]
+    for (const n of Object.keys(sp.anchors) as AnchorName[]) {
+      const a = sp.anchors[n]
       anchors[n] = { x: x + k * a.x, y: y + k * a.y, unit: k * a.s, rot: a.r }
     }
   }
-  return { file, x, y, size, corr, anchors }
+  return { file, x, y, w: sp.width * k, h: sp.height * k, corr: { s: 1, dx: 0, dy: 0 }, anchors }
 }
 
 export const anchorTransform = (a: WorldAnchor) =>
   `translate(${a.x.toFixed(2)} ${a.y.toFixed(2)}) rotate(${a.rot}) scale(${a.unit.toFixed(4)})`
 
-export const imageTransform = (p: Placement) => {
-  const cx = p.x + p.size / 2, cy = p.y + p.size / 2
-  const { s, dx, dy } = p.corr
-  return s === 1 && !dx && !dy ? undefined : `translate(${(dx + cx).toFixed(2)} ${(dy + cy).toFixed(2)}) scale(${s}) translate(${-cx.toFixed(2)} ${-cy.toFixed(2)})`
-}
+export const imageTransform = (_p: Placement) => undefined
 
 export const CANVAS_SIZE = CANVAS
 export const GROUND_Y = GROUND
@@ -82,12 +72,16 @@ export interface Mount {
   span?: [string, string]
   at: [number, number]; w: number; dx: number; dy: number; rot?: number; mask?: number
   byStage?: Partial<Record<Stage, Partial<Mount>>>
+  /** per stage-mood sprite, e.g. 'adult-happy' */
+  byPose?: Record<string, Partial<Mount>>
 }
 /** A region authored in an anchor's canonical frame (SVG path data), used for clips and foreground fur patches. */
 export interface Region { anchor: AnchorName | 'earL' | 'earR'; d: string; byStage?: Partial<Record<Stage, string>> }
 export interface Wearable {
   slot: string; layer: Layer; file: string; width: number; height: number
   alphaBounds: [number, number, number, number]; mount: Mount; straps?: string
+  /** visible part of the art as fractions of alphaBounds [x0,y0,x1,y1]: collars show only their front arc (the back rim is 'behind the fur') */
+  crop?: [number, number, number, number]
   /** hard visibility region for the art (hides curled tips etc.) */
   clip?: Region
   /** foreground patches of the SELECTED pet image drawn over the wearable (fur tufts overlapping its edges) */
@@ -104,7 +98,7 @@ export interface Wearable {
 export const WEARABLES = ITEMS.wearables as unknown as Record<string, Wearable>
 export const STRAP_SVG = ITEMS.svg as unknown as Record<string, { layer: Layer; anchor: AnchorName; markup: string }>
 
-export const wearableUrl = (file: string) => `${import.meta.env.BASE_URL}assets/hashling/wearables/${file}.png`
+export const wearableUrl = (file: string) => `${base}assets/hashling/pixel/wearables/${file}.png`
 
 type Frames = Record<string, WorldAnchor>
 
@@ -123,8 +117,8 @@ export function mountOrigin(m: Mount, anchors: Frames): WorldAnchor | null {
  * SVG transform that places a wearable's source-pixel image (drawn at 0,0,width,height) on the pet:
  * the `at` fraction of its physical-content (alpha) box lands on the anchor, scaled so that box spans `w` canonical units.
  */
-export function wearableTransform(w: Wearable, stage: Stage, anchors: Frames, extraDy = 0): string | null {
-  const m: Mount = { ...w.mount, ...(w.mount.byStage?.[stage] ?? {}) }
+export function wearableTransform(w: Wearable, stage: Stage, anchors: Frames, extraDy = 0, mood: Mood = 'happy'): string | null {
+  const m: Mount = { ...w.mount, ...(w.mount.byStage?.[stage] ?? {}), ...(w.mount.byPose?.[`${stage}-${moodKey(mood)}`] ?? {}) }
   const o = mountOrigin(m, anchors)
   if (!o) return null
   const [x0, y0, x1, y1] = w.alphaBounds

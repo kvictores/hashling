@@ -13,7 +13,7 @@
   {"id": "acc_solar", "slot": "accessory", "name": "Solar Panel Backpack", "price": 70},
   {"id": "acc_glass", "slot": "accessory", "name": "Magnifying Glass", "price": 40},
   {"id": "acc_shield", "slot": "accessory", "name": "Shield Badge", "price": 50},
-  {"id": "bg_greenhouse", "slot": "background", "name": "Greenhouse", "price": 0},
-  {"id": "bg_rooftop", "slot": "background", "name": "Rooftop Garden", "price": 60},
-  {"id": "bg_neon", "slot": "background", "name": "Neon Greenhouse at Dusk", "price": 80}
+  {"id": "bg_greenhouse", "slot": "background", "name": "Glasshouse Garden", "price": 0},
+  {"id": "bg_rooftop", "slot": "background", "name": "Solarpunk Rooftops", "price": 60},
+  {"id": "bg_neon", "slot": "background", "name": "Canal Garden", "price": 80}
 ]

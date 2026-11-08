@@ -1,261 +1,529 @@
 {
-  "_comment": "Pet art geometry: which PNG belongs to which stage/fur, how it is normalised into the 200x200 SVG canvas, and where the wearables attach. All numbers in 'bbox' and 'anchors' are SOURCE pixels of the 1254x1254 art (alpha bounds + visually calibrated landmarks). Placement: scale k = height / bboxHeight, paws land on 'ground', bbox centre lands on x=100. An anchor {x,y,s,r} puts a wearable's canonical frame at that source point, s = source px per canonical unit, r = rotation in degrees (head/body tilt). earL/earR are the centres of the ears (used by items that span the head, e.g. the headset). 'corr' = [scale, dx, dy] about the frame centre registering generated fur variants onto the classic silhouette (silhouette overlap >= 0.99). Run `python scripts/sync_items.py` after editing to copy into extension/hashling.js.",
-  "canvas": 200,
-  "source": 1254,
-  "ground": 190,
-  "stages": {
-    "egg": {
-      "file": "hashling-egg",
-      "height": 134,
-      "bbox": [
-        216,
-        51,
-        1027,
-        1213
-      ]
-    },
-    "kitten": {
-      "file": "hashling-kitten",
-      "height": 128,
-      "bbox": [
-        132,
-        60,
-        1028,
-        1175
-      ],
-      "anchors": {
-        "crown": {
-          "x": 622,
-          "y": 204,
-          "s": 4.1,
-          "r": 14
-        },
-        "neck": {
-          "x": 545,
-          "y": 795,
-          "s": 3.5,
-          "r": 6
-        },
-        "chest": {
-          "x": 505,
-          "y": 910,
-          "s": 2.4,
-          "r": 4
-        },
-        "shoulders": {
-          "x": 490,
-          "y": 890,
-          "s": 3.0,
-          "r": 4
-        },
-        "paw": {
-          "x": 520,
-          "y": 1085,
-          "s": 3.0,
-          "r": 0
-        },
-        "earL": {
-          "x": 350,
-          "y": 200,
-          "s": 4.1,
-          "r": 14
-        },
-        "earR": {
-          "x": 885,
-          "y": 370,
-          "s": 4.1,
-          "r": 14
-        }
-      }
-    },
-    "cub": {
-      "file": "hashling-cub",
-      "height": 150,
-      "bbox": [
-        112,
-        29,
-        1227,
-        1218
-      ],
-      "anchors": {
-        "crown": {
-          "x": 522,
-          "y": 120,
-          "s": 3.6,
-          "r": 14
-        },
-        "neck": {
-          "x": 435,
-          "y": 612,
-          "s": 3.6,
-          "r": 6
-        },
-        "chest": {
-          "x": 440,
-          "y": 745,
-          "s": 2.7,
-          "r": 4
-        },
-        "shoulders": {
-          "x": 440,
-          "y": 712,
-          "s": 3.8,
-          "r": 4
-        },
-        "paw": {
-          "x": 505,
-          "y": 1100,
-          "s": 3.5,
-          "r": 0
-        },
-        "earL": {
-          "x": 295,
-          "y": 135,
-          "s": 3.6,
-          "r": 14
-        },
-        "earR": {
-          "x": 765,
-          "y": 250,
-          "s": 3.6,
-          "r": 14
-        }
+ "_comment": "Pixel-art pet geometry (feat/hashling-pixel-overhaul). Per stage and per mood sprite: individual PNG (assets/hashling/pixel), source size, bbox of the physical pixels (alpha >= 32) and anchors in SOURCE pixels. Placement: stage scale k (svg units per source px), sprite bbox centre on x=100, bbox bottom (paws) on the ground line. Anchor {x,y,s,r}: s = source px per canonical unit, r = degrees (head/body tilt). Mood -> sprite: happy -> happy, sleepy -> sleep, sad/alert -> idle (no dedicated sprites: motion + labelled cue). Fur variants are derived files <file>-moss|amber|cyan.png (classic = base file). Run `python scripts/sync_items.py` after editing.",
+ "canvas": 200,
+ "ground": 190,
+ "stages": {
+  "egg": {
+   "file": "hashling-egg",
+   "width": 1254,
+   "height": 1254,
+   "scale": 0.1,
+   "bbox": [
+    311,
+    283,
+    932,
+    1028
+   ]
+  },
+  "kitten": {
+   "scale": 0.4,
+   "moods": {
+    "idle": {
+     "file": "hashling-kitten-idle",
+     "width": 410,
+     "height": 418,
+     "bbox": [
+      36,
+      51,
+      363,
+      356
+     ],
+     "anchors": {
+      "crown": {
+       "x": 130,
+       "y": 92,
+       "s": 1.35,
+       "r": -6
       },
-      "alert": {
-        "file": "hashling-cub-alert",
-        "anchors": {
-          "crown": {
-            "x": 520,
-            "y": 130,
-            "s": 3.6,
-            "r": 9
-          },
-          "neck": {
-            "x": 470,
-            "y": 602,
-            "s": 3.5,
-            "r": 3
-          },
-          "chest": {
-            "x": 480,
-            "y": 760,
-            "s": 2.7,
-            "r": 2
-          },
-          "shoulders": {
-            "x": 490,
-            "y": 725,
-            "s": 3.7,
-            "r": 2
-          },
-          "paw": {
-            "x": 720,
-            "y": 1095,
-            "s": 3.5,
-            "r": 0
-          },
-          "earL": {
-            "x": 295,
-            "y": 175,
-            "s": 3.6,
-            "r": 9
-          },
-          "earR": {
-            "x": 800,
-            "y": 275,
-            "s": 3.6,
-            "r": 9
-          }
-        }
-      }
-    },
-    "adult": {
-      "file": "hashling-adult-classic-v4",
-      "height": 166,
-      "bbox": [
-        279,
-        110,
-        1099,
-        1153
-      ],
-      "furs": {
-        "fur_classic": {
-          "file": "hashling-adult-classic-v4",
-          "corr": [
-            1,
-            0,
-            0
-          ]
-        },
-        "fur_moss": {
-          "file": "hashling-adult-moss-v4",
-          "corr": [
-            1,
-            0,
-            0
-          ]
-        },
-        "fur_amber": {
-          "file": "hashling-adult-amber-v4",
-          "corr": [
-            1,
-            0,
-            0
-          ]
-        },
-        "fur_cyan": {
-          "file": "hashling-adult-cyan-v4",
-          "corr": [
-            0.995,
-            0,
-            0
-          ]
-        }
+      "earL": {
+       "x": 70,
+       "y": 92,
+       "s": 1,
+       "r": 0
       },
-      "anchors": {
-        "crown": {
-          "x": 548,
-          "y": 152,
-          "s": 3.0,
-          "r": 0
-        },
-        "earL": {
-          "x": 365,
-          "y": 205,
-          "s": 3.0,
-          "r": 0
-        },
-        "earR": {
-          "x": 718,
-          "y": 208,
-          "s": 3.0,
-          "r": 0
-        },
-        "neck": {
-          "x": 545,
-          "y": 548,
-          "s": 2.9,
-          "r": 0
-        },
-        "chest": {
-          "x": 548,
-          "y": 668,
-          "s": 2.6,
-          "r": 0
-        },
-        "shoulders": {
-          "x": 550,
-          "y": 630,
-          "s": 3.5,
-          "r": 0
-        },
-        "paw": {
-          "x": 578,
-          "y": 1070,
-          "s": 3.2,
-          "r": 0
-        }
+      "earR": {
+       "x": 196,
+       "y": 80,
+       "s": 1,
+       "r": 0
+      },
+      "neck": {
+       "x": 150,
+       "y": 190,
+       "s": 1.12,
+       "r": -4
+      },
+      "chest": {
+       "x": 135,
+       "y": 215,
+       "s": 1.2,
+       "r": -2
+      },
+      "shoulders": {
+       "x": 130,
+       "y": 205,
+       "s": 2.0,
+       "r": 0
+      },
+      "paw": {
+       "x": 72,
+       "y": 335,
+       "s": 1.6,
+       "r": 0
       }
+     }
+    },
+    "happy": {
+     "file": "hashling-kitten-happy",
+     "width": 410,
+     "height": 418,
+     "bbox": [
+      92,
+      102,
+      362,
+      356
+     ],
+     "anchors": {
+      "crown": {
+       "x": 172,
+       "y": 126,
+       "s": 1.15,
+       "r": -8
+      },
+      "earL": {
+       "x": 125,
+       "y": 142,
+       "s": 1,
+       "r": 0
+      },
+      "earR": {
+       "x": 227,
+       "y": 128,
+       "s": 1,
+       "r": 0
+      },
+      "neck": {
+       "x": 198,
+       "y": 219,
+       "s": 1.0,
+       "r": -4
+      },
+      "chest": {
+       "x": 168,
+       "y": 255,
+       "s": 1.1,
+       "r": -2
+      },
+      "shoulders": {
+       "x": 165,
+       "y": 240,
+       "s": 1.8,
+       "r": 0
+      },
+      "paw": {
+       "x": 130,
+       "y": 335,
+       "s": 1.5,
+       "r": 0
+      }
+     }
+    },
+    "sleep": {
+     "file": "hashling-kitten-sleep",
+     "width": 410,
+     "height": 418,
+     "bbox": [
+      45,
+      176,
+      364,
+      356
+     ],
+     "anchors": {
+      "crown": {
+       "x": 130,
+       "y": 208,
+       "s": 1.2,
+       "r": 0
+      },
+      "earL": {
+       "x": 85,
+       "y": 200,
+       "s": 1,
+       "r": 0
+      },
+      "earR": {
+       "x": 195,
+       "y": 198,
+       "s": 1,
+       "r": 0
+      },
+      "neck": {
+       "x": 150,
+       "y": 306,
+       "s": 1.15,
+       "r": 0
+      },
+      "chest": {
+       "x": 150,
+       "y": 330,
+       "s": 1.1,
+       "r": 0
+      },
+      "shoulders": {
+       "x": 205,
+       "y": 250,
+       "s": 1.8,
+       "r": 0
+      },
+      "paw": {
+       "x": 95,
+       "y": 335,
+       "s": 1.4,
+       "r": 0
+      }
+     }
     }
+   }
+  },
+  "cub": {
+   "scale": 0.44,
+   "moods": {
+    "idle": {
+     "file": "hashling-cub-idle",
+     "width": 400,
+     "height": 418,
+     "bbox": [
+      48,
+      78,
+      381,
+      370
+     ],
+     "anchors": {
+      "crown": {
+       "x": 158,
+       "y": 112,
+       "s": 1.5,
+       "r": 0
+      },
+      "earL": {
+       "x": 85,
+       "y": 125,
+       "s": 1,
+       "r": 0
+      },
+      "earR": {
+       "x": 232,
+       "y": 125,
+       "s": 1,
+       "r": 0
+      },
+      "neck": {
+       "x": 160,
+       "y": 218,
+       "s": 1.2,
+       "r": 0
+      },
+      "chest": {
+       "x": 152,
+       "y": 248,
+       "s": 1.4,
+       "r": 0
+      },
+      "shoulders": {
+       "x": 160,
+       "y": 238,
+       "s": 2.4,
+       "r": 0
+      },
+      "paw": {
+       "x": 205,
+       "y": 355,
+       "s": 1.8,
+       "r": 0
+      }
+     }
+    },
+    "happy": {
+     "file": "hashling-cub-happy",
+     "width": 400,
+     "height": 418,
+     "bbox": [
+      48,
+      51,
+      375,
+      356
+     ],
+     "anchors": {
+      "crown": {
+       "x": 150,
+       "y": 78,
+       "s": 1.4,
+       "r": -8
+      },
+      "earL": {
+       "x": 80,
+       "y": 92,
+       "s": 1,
+       "r": 0
+      },
+      "earR": {
+       "x": 225,
+       "y": 80,
+       "s": 1,
+       "r": 0
+      },
+      "neck": {
+       "x": 176,
+       "y": 204,
+       "s": 1.2,
+       "r": -4
+      },
+      "chest": {
+       "x": 165,
+       "y": 232,
+       "s": 1.3,
+       "r": -2
+      },
+      "shoulders": {
+       "x": 165,
+       "y": 215,
+       "s": 2.4,
+       "r": 0
+      },
+      "paw": {
+       "x": 100,
+       "y": 335,
+       "s": 1.8,
+       "r": 0
+      }
+     }
+    },
+    "sleep": {
+     "file": "hashling-cub-sleep",
+     "width": 400,
+     "height": 418,
+     "bbox": [
+      26,
+      146,
+      368,
+      337
+     ],
+     "anchors": {
+      "crown": {
+       "x": 112,
+       "y": 178,
+       "s": 1.3,
+       "r": -10
+      },
+      "earL": {
+       "x": 68,
+       "y": 190,
+       "s": 1,
+       "r": 0
+      },
+      "earR": {
+       "x": 170,
+       "y": 172,
+       "s": 1,
+       "r": 0
+      },
+      "neck": {
+       "x": 135,
+       "y": 276,
+       "s": 1.25,
+       "r": 0
+      },
+      "chest": {
+       "x": 150,
+       "y": 290,
+       "s": 1.2,
+       "r": 0
+      },
+      "shoulders": {
+       "x": 230,
+       "y": 235,
+       "s": 2.2,
+       "r": 0
+      },
+      "paw": {
+       "x": 100,
+       "y": 308,
+       "s": 1.6,
+       "r": 0
+      }
+     }
+    }
+   }
+  },
+  "adult": {
+   "scale": 0.46,
+   "moods": {
+    "idle": {
+     "file": "hashling-adult-idle",
+     "width": 444,
+     "height": 418,
+     "bbox": [
+      31,
+      54,
+      426,
+      370
+     ],
+     "anchors": {
+      "crown": {
+       "x": 120,
+       "y": 76,
+       "s": 1.3,
+       "r": -12
+      },
+      "earL": {
+       "x": 70,
+       "y": 88,
+       "s": 1,
+       "r": 0
+      },
+      "earR": {
+       "x": 178,
+       "y": 76,
+       "s": 1,
+       "r": 0
+      },
+      "neck": {
+       "x": 110,
+       "y": 175,
+       "s": 0.9,
+       "r": -6
+      },
+      "chest": {
+       "x": 108,
+       "y": 200,
+       "s": 1.6,
+       "r": -4
+      },
+      "shoulders": {
+       "x": 130,
+       "y": 188,
+       "s": 2.2,
+       "r": 0
+      },
+      "paw": {
+       "x": 75,
+       "y": 350,
+       "s": 1.7,
+       "r": 0
+      }
+     }
+    },
+    "happy": {
+     "file": "hashling-adult-happy",
+     "width": 444,
+     "height": 418,
+     "bbox": [
+      23,
+      36,
+      426,
+      356
+     ],
+     "anchors": {
+      "crown": {
+       "x": 100,
+       "y": 64,
+       "s": 1.25,
+       "r": -12
+      },
+      "earL": {
+       "x": 52,
+       "y": 82,
+       "s": 1,
+       "r": 0
+      },
+      "earR": {
+       "x": 150,
+       "y": 56,
+       "s": 1,
+       "r": 0
+      },
+      "neck": {
+       "x": 108,
+       "y": 152,
+       "s": 0.86,
+       "r": -8
+      },
+      "chest": {
+       "x": 105,
+       "y": 175,
+       "s": 1.5,
+       "r": -4
+      },
+      "shoulders": {
+       "x": 125,
+       "y": 170,
+       "s": 2.2,
+       "r": 0
+      },
+      "paw": {
+       "x": 70,
+       "y": 335,
+       "s": 1.7,
+       "r": 0
+      }
+     }
+    },
+    "sleep": {
+     "file": "hashling-adult-sleep",
+     "width": 444,
+     "height": 418,
+     "bbox": [
+      18,
+      128,
+      412,
+      340
+     ],
+     "anchors": {
+      "crown": {
+       "x": 92,
+       "y": 212,
+       "s": 1.3,
+       "r": -5
+      },
+      "earL": {
+       "x": 50,
+       "y": 215,
+       "s": 1,
+       "r": 0
+      },
+      "earR": {
+       "x": 155,
+       "y": 195,
+       "s": 1,
+       "r": 0
+      },
+      "neck": {
+       "x": 112,
+       "y": 274,
+       "s": 1.0,
+       "r": 0
+      },
+      "chest": {
+       "x": 130,
+       "y": 282,
+       "s": 1.3,
+       "r": 0
+      },
+      "shoulders": {
+       "x": 205,
+       "y": 205,
+       "s": 2.2,
+       "r": 0
+      },
+      "paw": {
+       "x": 60,
+       "y": 308,
+       "s": 1.6,
+       "r": 0
+      }
+     }
+    }
+   }
   }
+ }
 }

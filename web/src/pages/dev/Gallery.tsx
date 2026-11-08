@@ -49,6 +49,15 @@ export default function Gallery() {
     return (
       <div className="relative inline-block bg-white p-2" id="one">
         <Hashling stage={one as Stage} mood={(q.get('mood') as Mood) ?? 'happy'} equipped={parseEq(q.get('eq'))} size={Number(q.get('size') ?? 600)} animated={false} />
+        {/* ?dots=1 : the pet's anchors (crown, ears, neck, chest, shoulders, paw) drawn as labelled dots */}
+        {q.get('dots') && (() => {
+          const an = placement(one as Stage, (q.get('mood') as Mood) ?? 'happy', parseEq(q.get('eq')).fur).anchors
+          if (!an) return null
+          const size = Number(q.get('size') ?? 600)
+          return <svg viewBox="0 0 200 200" width={size} height={size} className="pointer-events-none absolute left-2 top-2">
+            {Object.entries(an).map(([n, a]) => <g key={n}><circle cx={a.x} cy={a.y} r={1.3} fill="#e0007a" /><text x={a.x + 1.8} y={a.y - 1} fontSize={3.4} fill="#e0007a" fontWeight={700}>{n}</text></g>)}
+          </svg>
+        })()}
         {/* ?grid=neck|crown|chest ... : canonical-unit grid in that anchor's frame (10 units per line) for designing clips / fur patches */}
         {q.get('grid') && (() => {
           const a = placement(one as Stage, 'happy', parseEq(q.get('eq')).fur).anchors?.[q.get('grid') as 'neck']
