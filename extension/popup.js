@@ -35,13 +35,8 @@
     if (!u) return;
     var quiz = await send({ type: 'quiz-status' });
     $('pet').innerHTML = HashlingSVG.build({ stage: u.stage, mood: u.mood === 'sad' ? 'sad' : 'happy', equipped: u.equipped, size: 170 });
-    var BG = {
-      bg_greenhouse: 'linear-gradient(180deg, #DCEFEA, #F7F1DF)',
-      bg_rooftop: 'linear-gradient(180deg, #BFE3E8, #FCE9C8 70%, #E7D3B5)',
-      bg_neon: 'linear-gradient(180deg, #2B1F4A, #7A3D7A 60%, #F2915D)'
-    };
-    document.querySelector('.pet-card').style.background = BG[u.equipped && u.equipped.background] || BG.bg_greenhouse;
-    $('speech').style.color = u.equipped && u.equipped.background === 'bg_neon' ? '#FBF7EE' : '';
+    // Habitat rule (extension popup): ONE simple gradient (popup.css .pet-card) for every pet stage, adult included.
+    // Deliberately independent of the website's den artwork and of any shop background the user equipped.
     $('speech').textContent = speech(u, quiz);
     $('streak').textContent = u.streak;
     $('wallet').textContent = u.wallet;
