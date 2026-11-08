@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { API, api, type EvalSummary, type Metrics } from '../api'
 import { Card } from '../components/ui'
-import { Hashling } from '../hashling/Hashling'
 
 const PRIVACY = [
   { icon: '🗂️', title: 'No content is stored', body: 'Hashling never saves pages, texts or emails. It only logs event metadata: warning type, risk level, scam category and domain.' },
@@ -27,7 +26,7 @@ export default function About() {
 
   return (
     <div className="space-y-8">
-      <div className="grid items-center gap-6 lg:grid-cols-[1fr_260px]">
+      <div>
         <div>
           <h1 className="text-4xl font-bold">About Hashling</h1>
           <p className="mt-3 max-w-3xl text-lg">
@@ -35,7 +34,6 @@ export default function About() {
             Warnings come from Hashling herself instead of a generic red box, heeding them earns points, and every blocked threat becomes a quick lesson.
           </p>
         </div>
-        <div className="mx-auto"><Hashling stage="adult" mood="happy" equipped={{ hat: 'hat_sprout', accessory: 'acc_shield' }} size={220} /></div>
       </div>
 
       <section>
