@@ -21,6 +21,27 @@ export default function Gallery() {
     }
     return eq
   }
+  if (q.get('fit')) {
+    // Development-only fitting view: /dev/hashling?fit=1  (every wearable alone, the four combos, all furs, compact popup size)
+    const ALL = ['hat_sprout', 'hat_visor', 'hat_flower', 'hat_antenna', 'collar_bell', 'collar_vine', 'collar_led', 'acc_solar', 'acc_glass', 'acc_shield']
+    const COMBOS = [
+      ['fur_classic', 'hat_sprout', 'collar_bell', 'acc_glass'], ['fur_moss', 'hat_flower', 'collar_vine', 'acc_shield'],
+      ['fur_cyan', 'hat_visor', 'collar_led', 'acc_solar'], ['fur_amber', 'hat_antenna', 'collar_bell', 'acc_shield'],
+    ]
+    const stage = (q.get('stage') as Stage) ?? 'adult'
+    return (
+      <div className="space-y-4 bg-white p-3" id="fit">
+        <div className="grid grid-cols-5 gap-1">{ALL.map(id => (
+          <div key={id} className="text-center"><Hashling stage={stage} equipped={parseEq(id)} size={300} animated={false} /><div className="data text-[10px]">{id}</div></div>
+        ))}</div>
+        <div className="grid grid-cols-4 gap-1">{COMBOS.map((c, i) => <Hashling key={i} stage={stage} equipped={parseEq(c.join(','))} size={340} animated={false} />)}</div>
+        <div className="flex flex-wrap items-end gap-2">
+          {['fur_classic', 'fur_moss', 'fur_amber', 'fur_cyan'].flatMap(f => ['hat_antenna,collar_led,acc_solar', 'hat_visor,collar_bell,acc_glass'].map(g =>
+            <Hashling key={f + g} stage={stage} equipped={parseEq(`${f},${g}`)} size={170} animated={false} />))}
+        </div>
+      </div>
+    )
+  }
   const one = q.get('one')
   if (one) {
     // /dev/hashling?one=adult&mood=happy&size=600&eq=hat_visor,collar_led -> one large pet (for alignment checks)
