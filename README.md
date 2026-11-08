@@ -136,7 +136,8 @@ The main set was written while building the rules, so its score is optimistic. T
 
 ## Visual refresh: how the mascot is built
 Hashling is the supplied PNG art (`web/public/assets/hashling`, `extension/assets/hashling`) with wearables drawn as SVG layers on
-the art's anatomy anchors. `web/src/hashling/pets.json` holds each stage/fur's art file, normalisation and the crown / neck / chest /
-shoulders / paw anchors; `items.json` holds the wearable SVG fragments. After editing either, run `python scripts/sync_items.py` so the
-no-build-step extension (`extension/hashling.js`) stays identical. Layer order: shadow, behind-accessory, pet, front accessory, collar, hat.
+the art's anatomy anchors. `web/src/hashling/pets.json` holds each stage/fur's art file (the adult is the playful v4), normalisation and the
+crown / ears / neck / chest / shoulders / paw anchors; `items.json` is the versioned wearable registry (isolated PNGs in `assets/hashling/wearables`,
+each with its alphaBounds, render layer and mount). After editing either, run `python scripts/sync_items.py` so the
+no-build-step extension (`extension/hashling.js`) stays identical. Layer order: shadow, behind-pet (backpack), pet, straps, front accessory, collar, hat.
 The art is static, so moods are pose motion plus a small cue badge (the cub uses the supplied alert pose).
