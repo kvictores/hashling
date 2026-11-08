@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Mood, User } from '../api'
 import { Hashling } from '../hashling/Hashling'
-import { assetUrl } from '../hashling/geometry'
+import { assetUrl, backgroundUrl, PIXELATED } from '../hashling/geometry'
 
 interface Props { user: User; results: (boolean | null)[]; pop: { key: number; pts: number } | null; done?: boolean }
 
@@ -28,8 +28,8 @@ const LEDGES_STRIP = [
  * transparent margins + the grass thickness); calibrated from the supplied quiz-garden-ledge.png (aspect 3:1).
  */
 const LAYOUT = {
-  tower: { ratio: '720 / 1350', ledges: LEDGES, ledgeW: 50, pet: 35, egg: 25, reward: { x: 76, y: 86, w: 21 } },
-  strip: { ratio: '358 / 172', ledges: LEDGES_STRIP, ledgeW: 22, pet: 22, egg: 16, reward: { x: 93, y: 68, w: 14 } },
+  tower: { ratio: '720 / 1350', ledges: LEDGES, ledgeW: 50, pet: 46, egg: 30, reward: { x: 76, y: 86, w: 21 } },
+  strip: { ratio: '358 / 172', ledges: LEDGES_STRIP, ledgeW: 22, pet: 28, egg: 18, reward: { x: 93, y: 68, w: 14 } },
 } as const
 const LEDGE_ASPECT = 3
 const LEDGE_STAND = 0.4 // walking surface sits 40% down the ledge image (0.6 of its height remains below the paws)
@@ -104,23 +104,9 @@ export function ClimbTower({ user, results, pop, done = false }: Props) {
       <div className="relative w-full overflow-hidden rounded-[1.6rem] border border-leaf/15 bg-[#E3F2FB] shadow-[0_10px_26px_-16px_rgba(32,61,53,0.5)]"
         style={{ aspectRatio: lay.ratio, containerType: 'inline-size' }}
         role="img" aria-label={`Greenhouse climb: ledge ${pos} of ${top}${atTop ? ', reached the top' : done ? ', quiz complete' : ''}`}>
-        {/* simple airy sky: soft pale-blue gradient + a few subtle clouds (no arch, buildings or foliage) */}
-        <svg aria-hidden className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
-          <defs>
-            <linearGradient id="climb-sky" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="#CFE8F8" />
-              <stop offset="0.6" stopColor="#E3F2FB" />
-              <stop offset="1" stopColor="#F4FAFD" />
-            </linearGradient>
-          </defs>
-          <rect width="100" height="100" fill="url(#climb-sky)" />
-          <g fill="#fff" opacity="0.8">
-            <ellipse cx="22" cy="14" rx="10" ry="2.6" /><ellipse cx="29" cy="12" rx="6" ry="2.6" />
-            <ellipse cx="78" cy="38" rx="11" ry="2.8" /><ellipse cx="71" cy="36.4" rx="6" ry="2.4" />
-            <ellipse cx="30" cy="62" rx="9" ry="2.4" /><ellipse cx="36" cy="60.6" rx="5" ry="2.2" />
-            <ellipse cx="74" cy="86" rx="10" ry="2.4" />
-          </g>
-        </svg>
+        {/* glasshouse scene as the visual basis (pet-free; the platforms and the pet are live layers, the scenery is NOT gameplay geometry) */}
+        <img src={backgroundUrl('bg-glasshouse')} alt="" draggable={false} aria-hidden
+          className="absolute inset-0 h-full w-full object-cover" style={{ ...PIXELATED, objectPosition: desktop ? '38% 50%' : '30% 60%' }} />
 
         {/* gold shield / sun reward: lit only once the top ledge is reached */}
         <img src={assetUrl('protection-shield')} alt="" aria-hidden draggable={false}
@@ -128,16 +114,16 @@ export function ClimbTower({ user, results, pop, done = false }: Props) {
           style={{ left: `${lay.reward.x}%`, bottom: `${lay.reward.y}%`, width: `${lay.reward.w}cqw`, transform: 'translate(-50%, 50%)',
             filter: atTop ? undefined : 'grayscale(0.85) opacity(0.55)' }} />
 
-        {/* four separate ledge platforms (start + 3 climb ledges) */}
+        {/* four live platforms (start + 3 climb ledges): pixel steps drawn in code, in the same coordinate system as the pet */}
         {lay.ledges.map((l, i) => (
-          <div key={i} className="absolute" style={{ left: `${l.x}%`, bottom: `calc(${l.y}% - ${((lay.ledgeW / LEDGE_ASPECT) * (1 - LEDGE_STAND)).toFixed(2)}cqw)`, width: `${lay.ledgeW}cqw`, transform: 'translateX(-50%)' }}>
-            <img src={assetUrl('quiz-garden-ledge')} alt="" draggable={false} aria-hidden className="block w-full" />
+          <div key={i} className="absolute" style={{ left: `${l.x}%`, bottom: `calc(${l.y}% - ${((lay.ledgeW / LEDGE_ASPECT) * (1 - LEDGE_STAND)).toFixed(2)}cqw)`, width: `${lay.ledgeW}cqw`, transform: 'translateX(-50%)', aspectRatio: '3 / 1' }}>
+            <div className="pix-ledge absolute inset-x-0 top-[40%] h-[34%]" />
+            <div className="pix-ledge-under absolute inset-x-[10%] top-[74%] h-[16%]" />
             {i > 0 && i <= pos && (
-              <span aria-hidden className="pointer-events-none absolute left-1/2 top-[60%] h-[16%] w-[34%] -translate-x-1/2 rounded-full"
-                style={{ background: 'radial-gradient(ellipse, rgba(34,211,197,.75), rgba(34,211,197,0) 70%)', opacity: 0.55 }} />
+              <span aria-hidden className="pointer-events-none absolute left-1/2 top-[42%] h-[14%] w-[44%] -translate-x-1/2" style={{ background: 'repeating-linear-gradient(90deg,#22D3C5 0 6px,transparent 6px 10px)', opacity: 0.8 }} />
             )}
             {pulse && pulse.i === i && (
-              <span key={pulse.key} aria-hidden className="ledge-pulse pointer-events-none absolute left-1/2 top-[52%] h-[40%] w-[70%] -translate-x-1/2 rounded-full" />
+              <span key={pulse.key} aria-hidden className="ledge-pulse pointer-events-none absolute left-1/2 top-[40%] h-[40%] w-[70%] -translate-x-1/2 rounded-full" />
             )}
           </div>
         ))}

@@ -131,6 +131,9 @@ h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: -0
 .reward-lit { filter: drop-shadow(0 0 10px rgba(229, 180, 82, .85)) drop-shadow(0 0 3px rgba(255, 244, 200, .9)); animation: reward-glow 3.2s ease-in-out infinite; }
 @keyframes reward-glow { 0%, 100% { filter: drop-shadow(0 0 7px rgba(229, 180, 82, .65)); } 50% { filter: drop-shadow(0 0 14px rgba(229, 180, 82, .95)); } }
 
+.pix-ledge { background: linear-gradient(#8DBF5A 0 30%, #5E8F3E 30% 46%, #E9DDB8 46% 100%); border: 3px solid #2B2233; box-shadow: inset 0 3px 0 #B6DB82, 0 3px 0 #2B2233; image-rendering: pixelated; }
+.pix-ledge-under { background: linear-gradient(#CDBE94 0 50%, #A99A72 50% 100%); border: 3px solid #2B2233; border-top: 0; }
+
 .vine-sway { animation: vine-sway 6s ease-in-out infinite; transform-origin: top center; }
 @keyframes vine-sway { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(1.5deg); } }
 
