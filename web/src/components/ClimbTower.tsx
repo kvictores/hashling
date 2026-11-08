@@ -101,11 +101,26 @@ export function ClimbTower({ user, results, pop, done = false }: Props) {
 
   return (
     <div className="mx-auto w-full max-w-[360px] select-none lg:max-w-[340px]">
-      <div className="relative w-full overflow-hidden rounded-[1.6rem] border border-leaf/15 bg-sky shadow-[0_10px_26px_-16px_rgba(32,61,53,0.5)]"
+      <div className="relative w-full overflow-hidden rounded-[1.6rem] border border-leaf/15 bg-[#E3F2FB] shadow-[0_10px_26px_-16px_rgba(32,61,53,0.5)]"
         style={{ aspectRatio: lay.ratio, containerType: 'inline-size' }}
         role="img" aria-label={`Greenhouse climb: ledge ${pos} of ${top}${atTop ? ', reached the top' : done ? ', quiz complete' : ''}`}>
-        <img src={assetUrl('quiz-greenhouse-backdrop', 'jpg')} alt="" draggable={false} aria-hidden
-          className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: desktop ? '50% 50%' : '50% 36%' }} />
+        {/* simple airy sky: soft pale-blue gradient + a few subtle clouds (no arch, buildings or foliage) */}
+        <svg aria-hidden className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <linearGradient id="climb-sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#CFE8F8" />
+              <stop offset="0.6" stopColor="#E3F2FB" />
+              <stop offset="1" stopColor="#F4FAFD" />
+            </linearGradient>
+          </defs>
+          <rect width="100" height="100" fill="url(#climb-sky)" />
+          <g fill="#fff" opacity="0.8">
+            <ellipse cx="22" cy="14" rx="10" ry="2.6" /><ellipse cx="29" cy="12" rx="6" ry="2.6" />
+            <ellipse cx="78" cy="38" rx="11" ry="2.8" /><ellipse cx="71" cy="36.4" rx="6" ry="2.4" />
+            <ellipse cx="30" cy="62" rx="9" ry="2.4" /><ellipse cx="36" cy="60.6" rx="5" ry="2.2" />
+            <ellipse cx="74" cy="86" rx="10" ry="2.4" />
+          </g>
+        </svg>
 
         {/* gold shield / sun reward: lit only once the top ledge is reached */}
         <img src={assetUrl('protection-shield')} alt="" aria-hidden draggable={false}

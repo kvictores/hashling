@@ -8,7 +8,7 @@ The optional accessories pack adds the approved playful v4 adult (reference/), t
 (assets/) and the head-icon that replaces the visual kit's.
 
 * pets / icons keep their alpha channel and are resized to a web-friendly size
-* opaque scenes (den, quiz backdrop) are exported as JPEG
+* the opaque den scene is exported as JPEG
 * favicon + extension 16/32/48/128 icons are built from the head icon, trimmed and padded
 """
 import sys
@@ -80,7 +80,7 @@ def main(src: Path, acc: Path | None):
     print("scenes")
     ledge = load("quiz-garden-ledge")
     save_png(resized(ledge, (ledge.width // 2, ledge.height // 2)), WEB / "quiz-garden-ledge.png")
-    for name, width in (("den-greenhouse", 1600), ("quiz-greenhouse-backdrop", 720)):
+    for name, width in (("den-greenhouse", 1600),):
         im = Image.open(src / f"{name}.png").convert("RGB")
         im = resized(im, (width, round(im.height * width / im.width)))
         p = WEB / f"{name}.jpg"
