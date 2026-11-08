@@ -16,5 +16,18 @@
     { "matches": ["<all_urls>"], "js": ["hashling.js", "content.js"], "run_at": "document_idle" },
     { "matches": ["https://mail.google.com/*", "http://localhost:5173/*"], "js": ["hashling.js", "gmail.js"], "run_at": "document_idle" }
   ],
-  "web_accessible_resources": [{ "resources": ["warning.css"], "matches": ["<all_urls>"] }]
+  "web_accessible_resources": [{
+    "resources": [
+      "warning.css",
+      "assets/hashling/hashling-egg.png",
+      "assets/hashling/hashling-kitten.png",
+      "assets/hashling/hashling-cub.png",
+      "assets/hashling/hashling-cub-alert.png",
+      "assets/hashling/hashling-adult-classic-v3.png",
+      "assets/hashling/hashling-adult-moss-v3.png",
+      "assets/hashling/hashling-adult-amber-v3.png",
+      "assets/hashling/hashling-adult-cyan-v3.png"
+    ],
+    "matches": ["<all_urls>"]
+  }]
 }

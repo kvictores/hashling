@@ -36,7 +36,7 @@
     var quiz = await send({ type: 'quiz-status' });
     $('pet').innerHTML = HashlingSVG.build({ stage: u.stage, mood: u.mood === 'sad' ? 'sad' : 'happy', equipped: u.equipped, size: 170 });
     var BG = {
-      bg_greenhouse: 'linear-gradient(180deg, #DFF1F0, #F7F1DF)',
+      bg_greenhouse: 'linear-gradient(180deg, #DCEFEA, #F7F1DF)',
       bg_rooftop: 'linear-gradient(180deg, #BFE3E8, #FCE9C8 70%, #E7D3B5)',
       bg_neon: 'linear-gradient(180deg, #2B1F4A, #7A3D7A 60%, #F2915D)'
     };

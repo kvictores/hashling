@@ -1,40 +1,42 @@
 :root {
-  --cream: #FBF7EE; --leaf: #3E8E5A; --leaf-dark: #2C6B42; --moss: #6FAF6B; --sun: #F2B33D; --sky: #BFE3E8;
-  --cyan: #22D3C5; --ink: #23332A; --muted: #5F6F64; --red: #D9463B;
+  --cream: #FBF7EE; --panel: #FFFEF9; --leaf: #28634C; --leaf-dark: #1E4D3A; --moss: #83A877; --sun: #E5B452; --sky: #DCEFEA;
+  --cyan: #22D3C5; --ink: #203D35; --muted: #52675E; --red: #D9463B;
 }
 * { box-sizing: border-box; }
 body {
   margin: 0; width: 340px; font: 14px/1.4 "Space Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink);
-  background: radial-gradient(400px 200px at 90% -10%, rgba(242,179,61,.25), transparent 60%),
-              radial-gradient(300px 200px at -10% 10%, rgba(191,227,232,.6), transparent 60%), var(--cream);
+  background: radial-gradient(400px 200px at 90% -10%, rgba(229,180,82,.24), transparent 60%),
+              radial-gradient(300px 200px at -10% 10%, rgba(131,168,119,.22), transparent 60%), var(--cream);
 }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px 6px; }
-.brand { display: flex; align-items: center; gap: 6px; font: 700 20px "Fraunces", Georgia, serif; color: var(--leaf); }
+.brand { display: flex; align-items: center; gap: 8px; font: 700 20px "Fraunces", Georgia, serif; color: var(--leaf); }
 select {
   font-family: inherit; font-size: 13px; font-weight: 600; color: var(--ink); background: rgba(255,255,255,.85);
-  border: 1px solid rgba(62,142,90,.3); border-radius: 999px; padding: 6px 10px; cursor: pointer;
+  border: 1px solid rgba(40,99,76,.3); border-radius: 999px; padding: 6px 10px; cursor: pointer;
 }
 select:focus-visible, .btn:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 main { padding: 4px 14px 14px; }
 .pet-card {
   position: relative; display: flex; flex-direction: column; align-items: center; border-radius: 22px; padding: 8px 10px 10px;
-  background: linear-gradient(180deg, #DFF1F0, #F7F1DF); border: 1px solid rgba(62,142,90,.15);
+  background: linear-gradient(180deg, #DCEFEA, #F7F1DF); border: 1px solid rgba(40,99,76,.15);
 }
 .pet { width: 170px; height: 170px; }
 .speech { margin: 2px 0 0; text-align: center; font-weight: 500; min-height: 20px; }
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0; }
-.stat { background: rgba(255,255,255,.75); border-radius: 14px; padding: 8px 6px; text-align: center; border: 1px solid rgba(62,142,90,.12); }
+.stat { background: var(--panel); border-radius: 16px; padding: 8px 6px; text-align: center; box-shadow: 0 8px 18px -14px rgba(32,61,53,.45); border: 1px solid rgba(40,99,76,.12); }
 .num { font: 700 20px "JetBrains Mono", ui-monospace, monospace; }
 .lbl { font-size: 11px; color: var(--muted); }
-.row { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,.75); border-radius: 14px; padding: 8px 12px; margin-bottom: 8px; border: 1px solid rgba(62,142,90,.12); }
+.stat .lbl { display: flex; flex-direction: column; align-items: center; gap: 1px; line-height: 1.2; }
+.ico { width: 20px; height: 20px; object-fit: contain; flex: none; }
+.row { display: flex; align-items: center; gap: 12px; background: var(--panel); border-radius: 16px; padding: 8px 12px; margin-bottom: 8px; border: 1px solid rgba(40,99,76,.12); }
 .val { font-weight: 700; }
 #stage { text-transform: capitalize; }
-.progress { flex: 1; height: 10px; border-radius: 99px; background: rgba(62,142,90,.12); overflow: hidden; }
+.progress { flex: 1; height: 10px; border-radius: 99px; background: rgba(40,99,76,.12); overflow: hidden; }
 .progress i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--moss), var(--leaf)); box-shadow: 0 0 10px rgba(34,211,197,.5); transition: width .6s; }
 .quiz { justify-content: space-between; }
 .dots { display: flex; gap: 5px; }
-.dots span { width: 22px; height: 10px; border-radius: 99px; background: rgba(35,51,42,.12); }
+.dots span { width: 22px; height: 10px; border-radius: 99px; background: rgba(32,61,53,.12); }
 .dots .ok { background: var(--leaf); }
 .dots .no { background: var(--red); }
 .btn {
