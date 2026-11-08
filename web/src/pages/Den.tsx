@@ -2,9 +2,9 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useUser } from '../UserContext'
 import { Hashling } from '../hashling/Hashling'
-import { Scene } from '../hashling/Scene'
-import { Card, ProgressBar, StreakFlame } from '../components/ui'
-import { Coin } from '../components/Layout'
+import { PetStand, Scene } from '../hashling/Scene'
+import { assetUrl } from '../hashling/geometry'
+import { Card, Coin, ProgressBar, ProtectionShield, StreakFlame } from '../components/ui'
 import { BonusCard } from '../components/BonusCard'
 import type { User } from '../api'
 
@@ -20,20 +20,24 @@ export default function Den() {
   const { user, refresh } = useUser()
   useEffect(() => { refresh() }, [refresh])
   if (!user) return <LoadingDen />
-  const mood = user.mood === 'sad' ? 'sad' : user.quiz_done_today || user.stage === 'egg' ? 'happy' : 'happy'
+  const mood = user.mood === 'sad' ? 'sad' : 'happy'
   const toNext = user.next_threshold != null ? user.next_threshold - user.lifetime_points : 0
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr]">
-      <div className="space-y-6">
-        <Scene background={user.equipped.background} className="aspect-[4/3] min-h-[340px] w-full">
-          <div className="glass pop-in absolute right-[4%] top-[5%] z-10 w-52 rounded-2xl rounded-bl-sm px-4 py-3 text-[15px] font-medium sm:w-60">
-            {speech(user)}
-          </div>
-          <div className="relative mb-[6%] w-[58%] max-w-[420px]">
-            <Hashling stage={user.stage} mood={mood} equipped={user.equipped} size="100%" />
-          </div>
+    <div className="grid gap-8 lg:grid-cols-[1.35fr_1fr]">
+      <div className="space-y-5">
+        <Scene background={user.equipped.background} className="aspect-[4/3] w-full">
+          <PetStand widthPct={56} maxWidth={430}>
+            <Hashling stage={user.stage} mood={mood} equipped={user.equipped} size="100%" shadow={false} />
+          </PetStand>
         </Scene>
+
+        {/* all text lives outside the illustration */}
+        <div className="glass pop-in flex items-center gap-4 rounded-2xl px-5 py-4">
+          <img src={assetUrl('hashling-head-icon')} alt="" width={40} height={40} className="h-10 w-10 shrink-0 object-contain" />
+          <p className="text-[17px] font-medium leading-snug"><span className="sr-only">Hashling says: </span>{speech(user)}</p>
+        </div>
+
         <div className="flex flex-wrap items-center justify-between gap-4 px-1">
           <div>
             <h1 className="text-4xl font-bold">{user.name}’s Hashling</h1>
@@ -55,7 +59,7 @@ export default function Den() {
               <div className="mt-1 text-sm text-muted">day streak</div>
             </div>
             <div>
-              <div className="flex items-center justify-center gap-1.5"><Coin size={26} /><span className="data text-3xl font-semibold">{user.wallet}</span></div>
+              <div className="flex items-center justify-center gap-1.5"><Coin size={30} /><span className="data text-3xl font-semibold">{user.wallet}</span></div>
               <div className="mt-1 text-sm text-muted">wallet</div>
             </div>
             <div>
@@ -78,8 +82,8 @@ export default function Den() {
         <Card>
           <h2 className="text-xl font-bold">Protection this week</h2>
           <div className="mt-4 flex items-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-leaf/10">
-              <ShieldIcon />
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-leaf/10">
+              <ProtectionShield size={44} />
             </div>
             <div>
               <p className="text-2xl font-bold"><span className="data">{user.stats.threats_blocked_week}</span> threat{user.stats.threats_blocked_week === 1 ? '' : 's'} blocked this week</p>
@@ -109,22 +113,12 @@ function StageTrack({ stage }: { stage: string }) {
     <div className="mt-4 grid grid-cols-4 gap-2">
       {stages.map(([s, t], i) => (
         <div key={s} className={`flex flex-col items-center rounded-xl py-2 ${i === idx ? 'bg-leaf/10 ring-1 ring-leaf/30' : ''} ${i > idx ? 'opacity-40 grayscale' : ''}`}>
-          <Hashling stage={s} size={48} animated={false} />
+          <Hashling stage={s} size={56} animated={false} />
           <span className="text-xs font-semibold capitalize">{s}</span>
           <span className="data text-[10px] text-muted">{t}</span>
         </div>
       ))}
     </div>
-  )
-}
-
-function ShieldIcon() {
-  return (
-    <svg width="36" height="36" viewBox="0 0 32 32" aria-hidden>
-      <path d="M16 3 L27 7 V15 C27 22 22 27 16 29 C10 27 5 22 5 15 V7 Z" fill="#3E8E5A" />
-      <path d="M11 16 L15 20 L22 12" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="27" cy="7" r="2" fill="#22D3C5" />
-    </svg>
   )
 }
 

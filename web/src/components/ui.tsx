@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import type { Analysis, Risk } from '../api'
+import { assetUrl } from '../hashling/geometry'
 
 export function Card({ children, className = '', vines = false }: { children: ReactNode; className?: string; vines?: boolean }) {
   return (
@@ -29,16 +30,23 @@ export function VineCorner() {
   )
 }
 
+/** Sun coin (wallet / quiz points). Supplied art, shown 16-28px. */
+export function Coin({ size = 22, className = '' }: { size?: number; className?: string }) {
+  return <img src={assetUrl('sun-coin')} alt="" aria-hidden width={size} height={size} draggable={false} className={`inline-block shrink-0 object-contain ${className}`} style={{ width: size, height: size }} />
+}
+
+/** Protection shield (protection stats, completion reward). Decorative: text carries the meaning. */
+export function ProtectionShield({ size = 36, className = '' }: { size?: number; className?: string }) {
+  return <img src={assetUrl('protection-shield')} alt="" aria-hidden width={size} height={size} draggable={false} className={`inline-block shrink-0 object-contain ${className}`} style={{ width: size, height: size }} />
+}
+
 export function StreakFlame({ streak, size = 'md' }: { streak: number; size?: 'sm' | 'md' | 'lg' }) {
-  const px = size === 'lg' ? 44 : size === 'sm' ? 18 : 26
+  const px = size === 'lg' ? 44 : size === 'sm' ? 22 : 28
   const lit = streak > 0
   return (
     <span className="inline-flex items-center gap-1.5" title={`${streak}-day streak`}>
-      <svg width={px} height={px} viewBox="0 0 32 32" aria-hidden>
-        <path d="M16 2 C18 9 26 12 26 20 A10 10 0 0 1 6 20 C6 14 10 12 11 7 C13 10 14 12 16 12 C16 8 15 5 16 2 Z"
-          fill={lit ? '#F2B33D' : '#D8D3C8'} />
-        <path d="M16 14 C17 18 21 19 21 23 A5 5 0 0 1 11 23 C11 20 13 19 13 17 C14 18 15 18 16 18 Z" fill={lit ? '#D9734E' : '#BDB6A8'} />
-      </svg>
+      <img src={assetUrl('streak-flame')} alt="" aria-hidden width={px} height={px} draggable={false} className="shrink-0 object-contain"
+        style={{ width: px, height: px, filter: lit ? undefined : 'grayscale(1) opacity(.45)' }} />
       <span className={`data font-semibold ${size === 'lg' ? 'text-3xl' : size === 'sm' ? 'text-sm' : 'text-lg'}`}>{streak}</span>
     </span>
   )
