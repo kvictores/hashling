@@ -101,12 +101,23 @@ h1, h2 { font-family: "Fraunces", Georgia, serif; margin: 0; letter-spacing: -0.
 .hl-btn-small.ghost { background: transparent; color: var(--muted); border: 1px solid rgba(35,51,42,.2); }
 .hl-btn-small:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 
-/* ------------------------------------------------ link-hover tooltip */
+/* ------------------------------------------------ link-hover tooltip (green / yellow / red) */
 .hl-tip {
-  position: fixed; pointer-events: none; display: flex; align-items: center; gap: 6px;
-  background: var(--ink); color: #fff; font-size: 13px; font-weight: 600; padding: 6px 10px 6px 6px; border-radius: 12px;
-  box-shadow: 0 8px 24px -8px rgba(0,0,0,.5); border: 1.5px solid var(--red); animation: hl-fade .15s ease both;
+  --tip-color: var(--leaf);
+  position: fixed; pointer-events: none; display: flex; align-items: flex-start; gap: 8px; max-width: min(320px, calc(100vw - 16px));
+  background: #fff; color: var(--ink); font-size: 13px; line-height: 1.35; padding: 8px 10px; border-radius: 12px;
+  box-shadow: 0 8px 24px -8px rgba(0,0,0,.45); border: 2px solid var(--tip-color); animation: hl-fade .12s ease both;
 }
+.hl-tip-icon {
+  flex: none; width: 20px; height: 20px; border-radius: 50%; background: var(--tip-color); color: #fff; font: 700 13px/20px system-ui, sans-serif; text-align: center;
+}
+.hl-tip-yellow .hl-tip-icon { color: #3b2a00; }
+.hl-tip-body { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.hl-tip-title { font-size: 13px; }
+.hl-tip-host { font: 600 12px "JetBrains Mono", ui-monospace, monospace; overflow-wrap: anywhere; }
+.hl-tip-why:empty { display: none; }
+.hl-tip-why { font-size: 12px; }
+.hl-tip-note { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
 .hl-tip .hl-face { width: 28px; height: 28px; }
 
 @keyframes hl-fade { from { opacity: 0 } to { opacity: 1 } }

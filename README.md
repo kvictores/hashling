@@ -132,5 +132,17 @@ The main set was written while building the rules, so its score is optimistic. T
 - Uvicorn's `--reload` was unreliable on Windows during development; restart the server after backend changes.
 - All brands (SwiftShip Parcel, MegaMart, Northbridge Bank, MetroToll, CloudNest, …) and all data are fictional. No third-party logos are used.
 
+## Link-hover safety tooltips (browser extension)
+Hover (or keyboard-focus) any normal http/https link and Hashling shows a small box next to it:
+- **Green**: *Safe — no obvious URL risks.*  **Yellow**: *Caution.*  **Red**: *Dangerous — high-risk link.*
+- It also shows the destination hostname and a short reason. Google, Bing and DuckDuckGo result links are decoded from the link itself, so you see the real destination.
+- Shortened links (bit.ly, t.co, …), plain `http://` and redirects it can't read are **Caution**, never automatically safe.
+- Press **Esc** or move away to dismiss it.
+
+It runs entirely in your browser from the link's address: it never opens the destination and never contacts the backend. It uses the same URL rules as the whole-page warnings (`extension/link-safety.js`).
+**It is a quick look at the address, not a malware scan, and it cannot guarantee that a link is safe.**
+
+Run the URL-rule tests (Node 18+, nothing to install): `node --test extension/tests/`
+
 ## License
 Hashling is licensed under the [MIT License](https://opensource.org/licenses/MIT).

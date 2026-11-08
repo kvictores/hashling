@@ -8,3 +8,4 @@ node_modules/
 web/dist/
 .DS_Store
 PROMPT.md
+.pnpm-store/

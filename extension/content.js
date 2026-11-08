@@ -11,17 +11,11 @@
   var LOCAL_THRESHOLD = 30;
 
   // ---------------------------------------------------------------- brand + domain data (subset of backend/data/brands.json)
-  var BRANDS = {
-    paypal: ['paypal.com'], amazon: ['amazon.com'], apple: ['apple.com', 'icloud.com'], microsoft: ['microsoft.com', 'live.com', 'outlook.com', 'office.com'],
-    google: ['google.com', 'gmail.com', 'youtube.com'], netflix: ['netflix.com'], facebook: ['facebook.com', 'meta.com'], instagram: ['instagram.com'],
-    whatsapp: ['whatsapp.com'], chase: ['chase.com'], wellsfargo: ['wellsfargo.com'], bankofamerica: ['bankofamerica.com'], citibank: ['citi.com', 'citibank.com'],
-    usps: ['usps.com'], fedex: ['fedex.com'], dhl: ['dhl.com'], tmobile: ['t-mobile.com'], verizon: ['verizon.com'], walmart: ['walmart.com'],
-    target: ['target.com'], costco: ['costco.com'], ebay: ['ebay.com'], coinbase: ['coinbase.com'], binance: ['binance.com'], venmo: ['venmo.com'],
-    linkedin: ['linkedin.com'], dropbox: ['dropbox.com'], adobe: ['adobe.com'], spotify: ['spotify.com'], steam: ['steampowered.com', 'steamcommunity.com'],
-    swiftship: ['swiftship.com'], megamart: ['megamart.com'], northbridge: ['northbridgebank.com'], crescentcu: ['crescentcu.org'], metrotoll: ['metrotoll.org'],
-    streamly: ['streamly.tv'], cloudnest: ['cloudnest.com'], paywave: ['paywave.com'], nimbus: ['nimbuswireless.com'], orbitron: ['orbitron.com'],
-    coinharbor: ['coinharbor.com'], hirepath: ['hirepath.com']
-  };
+  // brand/domain data and the URL rules live in link-safety.js (shared with the link-hover tooltips)
+  var LS = window.HashlingLinkSafety;
+  var BRANDS = LS.BRANDS;
+  var regDomain = LS.regDomain;
+  function scoreUrl(url) { return LS.scoreUrl(url, location.href); }
   // phrases that mean "this page claims to be brand X" (fictional + a few real)
   var ALIASES = {
     swiftship: ['swiftship'], megamart: ['megamart', 'mega mart'], northbridge: ['northbridge'], crescentcu: ['crescent credit union'],
@@ -30,81 +24,6 @@
     microsoft: ['microsoft'], apple: ['apple id', 'icloud'], chase: ['chase bank'], wellsfargo: ['wells fargo'], bankofamerica: ['bank of america'],
     usps: ['usps'], fedex: ['fedex'], dhl: ['dhl'], coinbase: ['coinbase'], binance: ['binance'], venmo: ['venmo'], ebay: ['ebay']
   };
-  var SAFE = ['google.com', 'youtube.com', 'wikipedia.org', 'github.com', 'stackoverflow.com', 'microsoft.com', 'apple.com', 'amazon.com',
-    'netflix.com', 'facebook.com', 'instagram.com', 'linkedin.com', 'reddit.com', 'x.com', 'twitter.com', 't-mobile.com', 'nytimes.com',
-    'bbc.com', 'cnn.com', 'espn.com', 'weather.com', 'yahoo.com', 'bing.com', 'duckduckgo.com', 'openai.com', 'anthropic.com', 'claude.ai',
-    'zoom.us', 'slack.com', 'notion.so', 'dropbox.com', 'paypal.com', 'chase.com', 'spotify.com', 'twitch.tv', 'utdallas.edu'];
-  var OFFICIAL = {};
-  Object.keys(BRANDS).forEach(function (k) { BRANDS[k].forEach(function (d) { OFFICIAL[d] = k; }); });
-  var VERY_SUS_TLD = ['top', 'xyz', 'icu', 'click', 'live', 'cc', 'tk', 'ml', 'ga', 'cf', 'gq', 'rest', 'cyou', 'sbs', 'buzz', 'club', 'win', 'loan', 'zip', 'mov'];
-  var SHORTENERS = ['bit.ly', 'tinyurl.com', 't.co', 'goo.gl', 'is.gd', 'ow.ly', 'cutt.ly', 'rb.gy', 'shorturl.at', 'tiny.cc', 'rebrand.ly'];
-  var MULTI = ['co.uk', 'com.au', 'co.in', 'com.br', 'co.jp', 'gov.uk', 'ac.uk', 'org.uk'];
-
-  function regDomain(host) {
-    var parts = host.toLowerCase().replace(/\.$/, '').split('.');
-    if (parts.length >= 3 && MULTI.indexOf(parts.slice(-2).join('.')) >= 0) return parts.slice(-3).join('.');
-    return parts.slice(-2).join('.');
-  }
-  function isIP(h) { return /^\d{1,3}(\.\d{1,3}){3}$/.test(h) || h.indexOf(':') >= 0; }
-  function lev(a, b) {
-    if (a === b) return 0;
-    var prev = [], i, j;
-    for (j = 0; j <= b.length; j++) prev[j] = j;
-    for (i = 1; i <= a.length; i++) {
-      var cur = [i];
-      for (j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
-      prev = cur;
-    }
-    return prev[b.length];
-  }
-
-  /** Local URL heuristics (JS port of backend heuristics.analyze_url_string). Returns {score, reasons}. */
-  function scoreUrl(url) {
-    var out = { score: 0, reasons: [] };
-    var u;
-    try { u = new URL(url, location.href); } catch (e) { return out; }
-    if (!/^https?:$/.test(u.protocol)) return out;
-    var host = u.hostname.toLowerCase();
-    var reg = regDomain(host);
-    var label = reg.split('.')[0];
-    var tld = reg.split('.').pop();
-    var sub = host === reg ? '' : host.slice(0, -reg.length - 1);
-    function add(w, r) { out.score += w; out.reasons.push(r); }
-    if (OFFICIAL[reg] || SAFE.indexOf(reg) >= 0) return out;
-    if (host.indexOf('xn--') >= 0) add(40, 'Uses punycode, which can disguise lookalike letters');
-    if (isIP(host)) add(35, 'Points to a raw IP address');
-    if (SHORTENERS.indexOf(reg) >= 0) add(22, 'Uses a URL shortener that hides the destination');
-    if (u.username) add(30, "Hides its real destination with an '@' trick");
-    var ascii = label.replace(/0/g, 'o').replace(/1/g, 'l').replace(/3/g, 'e').replace(/5/g, 's');
-    var tokens = label.split('-').concat(ascii.split('-'));
-    var found = false;
-    Object.keys(BRANDS).some(function (b) {
-      return BRANDS[b].some(function (off) {
-        var ol = off.split('.')[0];
-        if (ol.length < 5) return false;
-        var cands = [label, ascii].concat(ol.length >= 6 ? tokens : []);
-        for (var i = 0; i < cands.length; i++) {
-          var c = cands[i];
-          if (c.length < 4) continue;
-          var d = lev(c, ol);
-          if ((d > 0 && d <= (ol.length >= 7 ? 2 : 1)) || (ascii.indexOf(ol) >= 0 && label.indexOf(ol) < 0)) {
-            add(45, "Lookalike of a known brand's domain (" + off + ')'); found = true; return true;
-          }
-        }
-        if (ol.length >= 4 && ((label.indexOf(ol) >= 0 && label !== ol) || sub.indexOf(ol) >= 0)) {
-          add(40, "Brand name '" + ol + "' is used on a site that isn't " + off); found = true; return true;
-        }
-        return false;
-      });
-    });
-    if (VERY_SUS_TLD.indexOf(tld) >= 0) add(22, "Uses the '." + tld + "' ending, common on scam sites");
-    if ((label.match(/-/g) || []).length >= 2) add(14, 'Strings words together with hyphens');
-    if ((sub.match(/\./g) || []).length >= 2) add(10, 'Unusually deep chain of subdomains');
-    if (/(verify|secure|login|signin|account|update|confirm|wallet|unlock|restore|billing|pay|claim|refund)/.test(label + '.' + sub)) add(10, "Domain contains a bait word like 'verify' or 'pay'");
-    if (u.protocol === 'http:') add(5, 'Not encrypted (http)');
-    out.score = Math.min(100, out.score);
-    return out;
-  }
 
   // ---------------------------------------------------------------- page signals
   function visibleText(limit) {
@@ -380,50 +299,102 @@
   }
 
   // ---------------------------------------------------------------- link-hover tooltips
-  // A link is untrusted if its URL scores red locally, or it sits inside an email Hashling flagged red (gmail.js).
-  var tip = { host: null, root: null, el: null, link: null };
-  async function ensureTip() {
-    if (tip.host && tip.host.isConnected) return;
-    tip.host = document.createElement('hashling-tip');
-    tip.host.style.cssText = 'all: initial; position: fixed; z-index: 2147483647; top: 0; left: 0;';
-    tip.root = tip.host.attachShadow({ mode: 'closed' });
-    var st = document.createElement('style');
-    st.textContent = await css();
-    tip.root.appendChild(st);
-    tip.el = document.createElement('div');
-    tip.el.className = 'hl-tip';
-    tip.el.setAttribute('role', 'tooltip');
-    tip.el.innerHTML = '<span class="hl-face">' + HashlingSVG.build({ stage: 'kitten', mood: 'alert', size: 28, animated: false }) + '</span><span>Hashling doesn’t trust this link</span>';
-    tip.el.style.display = 'none';
-    tip.root.appendChild(tip.el);
-    document.documentElement.appendChild(tip.host);
+  // Hover or keyboard-focus an http(s) link -> small local verdict box (green / yellow / red). Everything runs locally from the
+  // address alone (link-safety.js): the destination is never opened and the backend is never asked. It is a quick look at the URL,
+  // not a malware scan and not a guarantee. Search-result redirects (Google, Bing, DuckDuckGo) are decoded from the link itself.
+  var tip = { host: null, el: null, link: null, seq: 0, building: null };
+  var TIP_COLORS = { green: '#3E8E5A', yellow: '#F2B33D', red: '#D9463B' };
+  var TIP_ICON = { green: '✓', yellow: '!', red: '✕' };
+  // On Hashling's own website only the fake demo pages get tooltips, not the app's normal navigation.
+  var tipsEnabled = location.origin !== WEB_ORIGIN || location.pathname.indexOf('/demo') === 0;
+
+  function buildTip() {
+    if (tip.building) return tip.building;
+    tip.building = (async function () {
+      var host = document.createElement('hashling-tip');
+      host.style.cssText = 'all: initial; position: fixed; z-index: 2147483647; top: 0; left: 0; width: 0; height: 0; pointer-events: none;';
+      var root = host.attachShadow({ mode: 'closed' });
+      var st = document.createElement('style');
+      st.textContent = await css();
+      root.appendChild(st);
+      var el = document.createElement('div');
+      el.className = 'hl-tip';
+      el.setAttribute('role', 'tooltip');
+      el.style.display = 'none';
+      el.innerHTML = '<span class="hl-tip-icon" aria-hidden="true"></span><span class="hl-tip-body"><b class="hl-tip-title"></b><span class="hl-tip-host"></span><span class="hl-tip-why"></span><span class="hl-tip-note"></span></span>';
+      root.appendChild(el);
+      tip.host = host; tip.el = el;
+    })();
+    return tip.building;
   }
-  function linkIsRed(a) {
-    if (!a.href || !/^https?:/i.test(a.href)) return false;
-    if (a.closest && a.closest('[data-hashling-risk="red"]')) return true;
-    try { if (new URL(a.href).hostname === location.hostname) return false; } catch (e) { return false; }
-    return scoreUrl(a.href).score >= 65;
+  function tipAttach() { if (tip.host && !tip.host.isConnected) (document.documentElement || document.body).appendChild(tip.host); }
+  function hideTip() {
+    tip.seq++; tip.link = null;
+    if (tip.el) tip.el.style.display = 'none';
   }
-  document.addEventListener('mouseover', async function (e) {
-    var a = e.target && e.target.closest && e.target.closest('a[href]');
-    if (!a || a === tip.link) return;
+  function tipLinkFrom(target) {
+    var n = target;
+    if (n && n.nodeType === 3) n = n.parentElement;
+    var a = n && n.closest ? n.closest('a[href], area[href]') : null;
+    return a && /^https?:/i.test(a.href || '') ? a : null; // a.href is already resolved to an absolute URL
+  }
+  function verdictFor(a) {
+    // Links inside an email Hashling already flagged red stay red (gmail.js marks the container)
+    var inRedMail = a.closest && a.closest('[data-hashling-risk="red"]');
+    var v = LS.checkLink(a.href, location.href);
+    if (!v) return null;
+    if (inRedMail && v.level !== 'red') return { level: 'red', title: 'Dangerous — high-risk link', host: v.host, reason: 'This link is inside an email Hashling flagged as a likely scam.', viaSearch: v.viaSearch };
+    return v;
+  }
+  function placeTip(a) {
+    var el = tip.el, r = a.getBoundingClientRect();
+    var vw = document.documentElement.clientWidth || window.innerWidth, vh = document.documentElement.clientHeight || window.innerHeight;
+    el.style.left = '0px'; el.style.top = '0px'; el.style.display = 'flex'; el.style.visibility = 'hidden';
+    var w = el.offsetWidth, h = el.offsetHeight, m = 8;
+    var x = Math.max(m, Math.min(r.left, vw - w - m));
+    var below = r.bottom + 8, above = r.top - h - 8;
+    var y = below + h <= vh - m ? below : (above >= m ? above : Math.max(m, Math.min(below, vh - h - m)));
+    el.style.left = Math.round(x) + 'px'; el.style.top = Math.round(y) + 'px'; el.style.visibility = 'visible';
+  }
+  async function showTip(a) {
+    if (!tipsEnabled || a === tip.link) return;
+    var my = ++tip.seq;
     tip.link = a;
-    if (!linkIsRed(a)) { if (tip.el) tip.el.style.display = 'none'; return; }
-    await ensureTip();
-    if (tip.link !== a) return;
-    var r = a.getBoundingClientRect();
-    tip.el.style.display = 'flex';
-    tip.el.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 260)) + 'px';
-    tip.el.style.top = (r.bottom + 8 > window.innerHeight - 40 ? r.top - 42 : r.bottom + 8) + 'px';
+    var v = verdictFor(a);
+    if (!v) { hideTip(); return; }
+    await buildTip();
+    if (my !== tip.seq || tip.link !== a || !a.isConnected) return; // pointer already moved on / link was removed meanwhile
+    tipAttach();
+    var el = tip.el, q = function (c) { return el.querySelector(c); };
+    el.className = 'hl-tip hl-tip-' + v.level;
+    q('.hl-tip-icon').textContent = TIP_ICON[v.level];
+    q('.hl-tip-title').textContent = v.title;                                   // textContent only: link text/URLs are never parsed as HTML
+    q('.hl-tip-host').textContent = (v.viaSearch ? 'Goes to ' : '') + v.host.slice(0, 80);
+    q('.hl-tip-why').textContent = v.level === 'green' ? '' : v.reason;
+    q('.hl-tip-note').textContent = 'Quick check of the address only, not a malware scan.';
+    el.style.setProperty('--tip-color', TIP_COLORS[v.level]);
+    el.setAttribute('aria-label', v.title + '. ' + v.host);
+    placeTip(a);
+  }
+
+  document.addEventListener('mouseover', function (e) {
+    var a = tipLinkFrom(e.composedPath ? e.composedPath()[0] : e.target);
+    if (a) showTip(a); else if (tip.link && !(e.relatedTarget && tip.link.contains(e.relatedTarget))) hideTip();
   }, true);
   document.addEventListener('mouseout', function (e) {
-    var a = e.target && e.target.closest && e.target.closest('a[href]');
-    if (a && a === tip.link && !(e.relatedTarget && a.contains(e.relatedTarget))) {
-      tip.link = null;
-      if (tip.el) tip.el.style.display = 'none';
-    }
+    if (!tip.link) return;
+    var to = e.relatedTarget;
+    if (!to || !tip.link.contains(to)) hideTip();            // left the link (or left the window)
   }, true);
-  window.addEventListener('scroll', function () { if (tip.el) tip.el.style.display = 'none'; tip.link = null; }, true);
+  document.addEventListener('focusin', function (e) { var a = tipLinkFrom(e.composedPath ? e.composedPath()[0] : e.target); if (a) showTip(a); }, true);
+  document.addEventListener('focusout', function () { hideTip(); }, true);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && tip.link) hideTip(); }, true); // never stops the page's own Escape handling
+  window.addEventListener('scroll', hideTip, true);
+  window.addEventListener('resize', hideTip);
+  window.addEventListener('blur', hideTip);
+  document.addEventListener('visibilitychange', hideTip);
+  // links added or removed while the box is open (single-page apps, infinite scroll): drop the box if its link vanished
+  new MutationObserver(function () { if (tip.link && !tip.link.isConnected) hideTip(); }).observe(document.documentElement, { childList: true, subtree: true });
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();
