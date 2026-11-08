@@ -80,11 +80,11 @@ def main(src: Path, acc: Path | None):
     print("scenes")
     ledge = load("quiz-garden-ledge")
     save_png(resized(ledge, (ledge.width // 2, ledge.height // 2)), WEB / "quiz-garden-ledge.png")
-    for name, width in (("den-greenhouse", 1600),):
+    for name, width in (("den-greenhouse", 1672),):
         im = Image.open(src / f"{name}.png").convert("RGB")
         im = resized(im, (width, round(im.height * width / im.width)))
         p = WEB / f"{name}.jpg"
-        im.save(p, quality=86, optimize=True, progressive=True)
+        im.save(p, quality=92, optimize=True, progressive=True)
         print(f"  {p.relative_to(ROOT)}  {im.size[0]}x{im.size[1]}  {p.stat().st_size // 1024} KB")
 
     print("favicon + extension icons")

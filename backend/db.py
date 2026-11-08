@@ -60,7 +60,7 @@ SEED = [
      "owned": [], "equipped": [], "events": [(2, "toll_fee", "metrotoll-pay.icu"), (4, "bank_impersonation", "northbridge-secure.icu")]},
     {"id": "sam", "name": "Sam", "lifetime": 420, "wallet": 180, "streak": 21, "played_yesterday": True,
      "owned": ["hat_sprout", "collar_led", "acc_shield", "fur_amber", "bg_rooftop"],
-     "equipped": ["hat_sprout", "collar_led", "bg_rooftop"],
+     "equipped": ["hat_sprout", "collar_led"],  # background: the default greenhouse (Rooftop stays owned, equip it in the shop)
      "events": [(0, "prize_giveaway", "megamart-rewards.club"), (1, "account_verification", "cloudnest.mail-upgrade.top"),
                 (3, "toll_fee", "metrotoll-pay.icu"), (5, "package_delivery", "swiftship.parcel-release.cc")]},
 ]
