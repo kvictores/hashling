@@ -9,13 +9,10 @@ export type Risk = 'red' | 'yellow' | 'safe'
 export interface User {
   id: string
   name: string
-  lifetime_points: number
   wallet: number
   streak: number
   stage: Stage
   next_stage: Stage | null
-  next_threshold: number | null
-  stage_threshold: number
   progress: number
   mood: Mood
   today: string

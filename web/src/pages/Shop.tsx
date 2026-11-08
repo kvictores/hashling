@@ -159,16 +159,16 @@ function Thumb({ it, stage }: { it: ShopItem; stage: 'kitten' | 'cub' | 'adult' 
 function LockedOverlay() {
   const { user } = useUser()
   if (!user) return null
-  const toAdult = Math.max(0, 250 - user.lifetime_points)
+  const stageIdx = ['egg', 'kitten', 'cub', 'adult'].indexOf(user.stage)
   return (
     <div className="absolute inset-x-0 top-10 z-10 flex justify-center px-4">
       <Card className="max-w-md text-center !bg-white/95">
         <div className="text-5xl" aria-hidden>🔒</div>
         <h2 className="mt-2 text-2xl font-bold">Grow Hashling to unlock</h2>
-        <p className="mt-2 text-muted">The shop opens when Hashling becomes an <b>adult</b> (250 lifetime points). You’re a <b className="capitalize">{user.stage}</b> with <span className="data">{user.lifetime_points}</span> points.</p>
-        <ProgressBar value={Math.min(1, user.lifetime_points / 250)} className="mt-4" />
-        <p className="data mt-2 text-sm text-muted">{toAdult} points to go</p>
-        <Link to="/quiz" className="btn btn-primary mt-4">Earn points in today’s quiz</Link>
+        <p className="mt-2 text-muted">The shop opens when Hashling becomes an <b>adult</b> as you play. You’re a <b className="capitalize">{user.stage}</b> right now.</p>
+        <ProgressBar value={Math.min(1, (stageIdx + user.progress) / 3)} className="mt-4" />
+        <p className="mt-2 text-sm text-muted">Keep answering questions and heeding warnings to grow.</p>
+        <Link to="/quiz" className="btn btn-primary mt-4">Play today’s quiz</Link>
       </Card>
     </div>
   )

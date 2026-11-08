@@ -50,7 +50,7 @@ function UserSwitcher() {
                 </span>
                 <span className="flex-1">
                   <span className="block font-semibold">{u.name}</span>
-                  <span className="block text-xs capitalize text-muted">{u.stage} · <span className="data">{u.lifetime_points}</span> pts</span>
+                  <span className="block text-xs capitalize text-muted">{u.stage}</span>
                 </span>
                 <StreakFlame streak={u.streak} size="sm" />
               </button>

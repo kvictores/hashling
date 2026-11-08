@@ -21,7 +21,6 @@ export default function Den() {
   useEffect(() => { refresh() }, [refresh])
   if (!user) return <LoadingDen />
   const mood = user.mood === 'sad' ? 'sad' : user.quiz_done_today || user.stage === 'egg' ? 'happy' : 'happy'
-  const toNext = user.next_threshold != null ? user.next_threshold - user.lifetime_points : 0
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr]">
@@ -49,7 +48,7 @@ export default function Den() {
 
       <div className="space-y-6">
         <Card vines>
-          <div className="grid grid-cols-3 gap-4 text-center">
+          <div className="grid grid-cols-2 gap-4 text-center">
             <div>
               <div className="flex justify-center"><StreakFlame streak={user.streak} size="lg" /></div>
               <div className="mt-1 text-sm text-muted">day streak</div>
@@ -58,15 +57,11 @@ export default function Den() {
               <div className="flex items-center justify-center gap-1.5"><Coin size={26} /><span className="data text-3xl font-semibold">{user.wallet}</span></div>
               <div className="mt-1 text-sm text-muted">wallet</div>
             </div>
-            <div>
-              <div className="data text-3xl font-semibold text-leaf">{user.lifetime_points}</div>
-              <div className="mt-1 text-sm text-muted">lifetime pts</div>
-            </div>
           </div>
           <div className="mt-6">
             <div className="mb-2 flex items-baseline justify-between text-sm">
               <span className="font-semibold capitalize">{user.stage}{user.next_stage ? ` → ${user.next_stage}` : ''}</span>
-              <span className="data text-muted">{user.next_stage ? `${toNext} pts to go` : 'fully grown ✨'}</span>
+              <span className="text-muted">{user.next_stage ? 'growing…' : 'fully grown ✨'}</span>
             </div>
             <ProgressBar value={user.progress} />
             <StageTrack stage={user.stage} />
@@ -103,15 +98,14 @@ export default function Den() {
 }
 
 function StageTrack({ stage }: { stage: string }) {
-  const stages = [['egg', 0], ['kitten', 30], ['cub', 100], ['adult', 250]] as const
+  const stages = [['egg'], ['kitten'], ['cub'], ['adult']] as const
   const idx = stages.findIndex(s => s[0] === stage)
   return (
     <div className="mt-4 grid grid-cols-4 gap-2">
-      {stages.map(([s, t], i) => (
+      {stages.map(([s], i) => (
         <div key={s} className={`flex flex-col items-center rounded-xl py-2 ${i === idx ? 'bg-leaf/10 ring-1 ring-leaf/30' : ''} ${i > idx ? 'opacity-40 grayscale' : ''}`}>
           <Hashling stage={s} size={48} animated={false} />
           <span className="text-xs font-semibold capitalize">{s}</span>
-          <span className="data text-[10px] text-muted">{t}</span>
         </div>
       ))}
     </div>
