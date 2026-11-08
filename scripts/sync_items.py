@@ -1,7 +1,7 @@
 """Copy Hashling's shared art data into extension/hashling.js.
 
 The extension has no build step, so the same data the web app imports is embedded between marker comments:
-  * web/src/hashling/items.json -> WEAR_REG  (wearable registry v2: PNG file, alphaBounds, layer, mount, strap svg)
+  * web/src/hashling/items.json -> WEAR_REG  (wearable registry v3 (pixel): PNG file, alphaBounds, layer, mount, crop)
   * web/src/hashling/pets.json  -> PET_GEOM  (stage/fur art files, normalisation bbox, wearable anchors)
 Run from the repo root:  python scripts/sync_items.py
 """
