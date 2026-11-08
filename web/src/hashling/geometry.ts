@@ -83,9 +83,21 @@ export interface Mount {
   at: [number, number]; w: number; dx: number; dy: number; rot?: number; mask?: number
   byStage?: Partial<Record<Stage, Partial<Mount>>>
 }
+/** A region authored in an anchor's canonical frame (SVG path data), used for clips and foreground fur patches. */
+export interface Region { anchor: AnchorName | 'earL' | 'earR'; d: string; byStage?: Partial<Record<Stage, string>> }
 export interface Wearable {
   slot: string; layer: Layer; file: string; width: number; height: number
   alphaBounds: [number, number, number, number]; mount: Mount; straps?: string
+  /** hard visibility region for the art (hides curled tips etc.) */
+  clip?: Region
+  /** foreground patches of the SELECTED pet image drawn over the wearable (fur tufts overlapping its edges) */
+  fur?: Region[]
+  /** contact shadow generated from the item's own alpha, confined to the clip */
+  shadow?: { dy: number; blur: number; opacity: number }
+  /** code-native fitted band drawn instead of the PNG body (the PNG then only supplies `detail`) */
+  band?: { anchor: AnchorName; markup: string }
+  /** part of the PNG (path in fractions of alphaBounds) redrawn above the fur patches with a narrow feather: pendants, central ornament */
+  detail?: { d: string; feather: number }
 }
 export const WEARABLES = ITEMS.wearables as unknown as Record<string, Wearable>
 export const STRAP_SVG = ITEMS.svg as unknown as Record<string, { layer: Layer; anchor: AnchorName; markup: string }>
@@ -109,7 +121,7 @@ export function mountOrigin(m: Mount, anchors: Frames): WorldAnchor | null {
  * SVG transform that places a wearable's source-pixel image (drawn at 0,0,width,height) on the pet:
  * the `at` fraction of its physical-content (alpha) box lands on the anchor, scaled so that box spans `w` canonical units.
  */
-export function wearableTransform(w: Wearable, stage: Stage, anchors: Frames): string | null {
+export function wearableTransform(w: Wearable, stage: Stage, anchors: Frames, extraDy = 0): string | null {
   const m: Mount = { ...w.mount, ...(w.mount.byStage?.[stage] ?? {}) }
   const o = mountOrigin(m, anchors)
   if (!o) return null
@@ -117,6 +129,6 @@ export function wearableTransform(w: Wearable, stage: Stage, anchors: Frames): s
   const aw = x1 - x0, ah = y1 - y0
   const k = m.w / aw
   const px = x0 + m.at[0] * aw, py = y0 + m.at[1] * ah
-  return `translate(${o.x.toFixed(2)} ${o.y.toFixed(2)}) rotate(${(o.rot + (m.rot ?? 0)).toFixed(2)}) scale(${o.unit.toFixed(4)}) translate(${m.dx} ${m.dy}) scale(${k.toFixed(5)}) translate(${-px.toFixed(1)} ${-py.toFixed(1)})`
+  return `translate(${o.x.toFixed(2)} ${o.y.toFixed(2)}) rotate(${(o.rot + (m.rot ?? 0)).toFixed(2)}) scale(${o.unit.toFixed(4)}) translate(${m.dx} ${m.dy + extraDy}) scale(${k.toFixed(5)}) translate(${-px.toFixed(1)} ${-py.toFixed(1)})`
 }
 export const mountFor = (w: Wearable, stage: Stage): Mount => ({ ...w.mount, ...(w.mount.byStage?.[stage] ?? {}) })

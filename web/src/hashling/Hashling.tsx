@@ -73,14 +73,14 @@ export function Hashling({ stage, mood = 'happy', equipped = {}, size = 200, cla
       <g className={bodyClass}>
         <g transform={pose || undefined}>
           <g style={tone ? { filter: tone } : undefined}>
-            <WearLayer layer="behindPet" equipped={equipped} anchors={a} stage={stage} uid={uid} />
+            <WearLayer layer="behindPet" equipped={equipped} anchors={a} stage={stage} uid={uid} pet={pl} />
             <g transform={imageTransform(pl)}>
               <image href={assetUrl(pl.file)} x={pl.x} y={pl.y} width={pl.size} height={pl.size} preserveAspectRatio="xMidYMid meet" aria-hidden />
             </g>
-            <WearLayer layer="frontStraps" equipped={equipped} anchors={a} stage={stage} uid={uid} />
-            <WearLayer layer="frontAccessory" equipped={equipped} anchors={a} stage={stage} uid={uid} />
-            <WearLayer layer="collar" equipped={equipped} anchors={a} stage={stage} uid={uid} />
-            <WearLayer layer="hat" equipped={equipped} anchors={a} stage={stage} uid={uid} />
+            <WearLayer layer="frontStraps" equipped={equipped} anchors={a} stage={stage} uid={uid} pet={pl} />
+            <WearLayer layer="frontAccessory" equipped={equipped} anchors={a} stage={stage} uid={uid} pet={pl} />
+            <WearLayer layer="collar" equipped={equipped} anchors={a} stage={stage} uid={uid} pet={pl} />
+            <WearLayer layer="hat" equipped={equipped} anchors={a} stage={stage} uid={uid} pet={pl} />
           </g>
         </g>
       </g>

@@ -1,4 +1,5 @@
 import { Hashling } from '../../hashling/Hashling'
+import { anchorTransform, placement } from '../../hashling/geometry'
 import type { Equipped, Mood, Slot, Stage } from '../../api'
 
 const STAGES: Stage[] = ['egg', 'kitten', 'cub', 'adult']
@@ -46,8 +47,22 @@ export default function Gallery() {
   if (one) {
     // /dev/hashling?one=adult&mood=happy&size=600&eq=hat_visor,collar_led -> one large pet (for alignment checks)
     return (
-      <div className="inline-block bg-white p-2" id="one">
+      <div className="relative inline-block bg-white p-2" id="one">
         <Hashling stage={one as Stage} mood={(q.get('mood') as Mood) ?? 'happy'} equipped={parseEq(q.get('eq'))} size={Number(q.get('size') ?? 600)} animated={false} />
+        {/* ?grid=neck|crown|chest ... : canonical-unit grid in that anchor's frame (10 units per line) for designing clips / fur patches */}
+        {q.get('grid') && (() => {
+          const a = placement(one as Stage, 'happy', parseEq(q.get('eq')).fur).anchors?.[q.get('grid') as 'neck']
+          if (!a) return null
+          const size = Number(q.get('size') ?? 600)
+          const lines = []
+          for (let v = -100; v <= 100; v += 10) {
+            const strong = v % 50 === 0
+            lines.push(<line key={'x' + v} x1={v} x2={v} y1={-100} y2={100} stroke={strong ? '#e00' : '#06c'} strokeWidth={strong ? 0.35 : 0.15} opacity={0.7} />)
+            lines.push(<line key={'y' + v} y1={v} y2={v} x1={-100} x2={100} stroke={strong ? '#e00' : '#06c'} strokeWidth={strong ? 0.35 : 0.15} opacity={0.7} />)
+            if (strong) lines.push(<text key={'t' + v} x={v + 0.5} y={-1} fontSize={3} fill="#e00">{v}</text>, <text key={'u' + v} x={0.5} y={v - 0.5} fontSize={3} fill="#e00">{v}</text>)
+          }
+          return <svg viewBox="0 0 200 200" width={size} height={size} className="pointer-events-none absolute left-2 top-2"><g transform={anchorTransform(a)}>{lines}</g></svg>
+        })()}
       </div>
     )
   }
